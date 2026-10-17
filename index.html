@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CETERA</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <!-- Loader overlay: white columns that slide up one-by-one to reveal the site -->
+    <div class="loader" id="loader">
+        <!-- The white columns that move up in a staggered sequence -->
+        <div class="loader-columns" id="loaderColumns">
+            <span class="loader-column"></span>
+            <span class="loader-column"></span>
+            <span class="loader-column"></span>
+            <span class="loader-column"></span>
+            <span class="loader-column"></span>
+            <span class="loader-column"></span>
+            <span class="loader-column"></span>
+            <span class="loader-column"></span>
+        </div>
+
+        <!-- Bouncing dots sit on top of the white columns.
+             Outer span = merge slide (JS), inner img = bounce. -->
+        <div class="loader-icons" id="loaderIcons">
+            <span class="loader-dot">
+                <img class="loader-icon" src="assets/loadericon1.svg" alt="" />
+            </span>
+            <span class="loader-dot">
+                <img class="loader-icon" src="assets/loadericon2.svg" alt="" />
+            </span>
+            <span class="loader-dot">
+                <img class="loader-icon" src="assets/loadericon3.svg" alt="" />
+            </span>
+
+            <!-- Single mark the three dots merge into -->
+            <img class="loader-merged" src="assets/loadericon2.svg" alt="" />
+        </div>
+    </div>
+
+    <!-- The site itself (grey body) -->
+    <main class="page" id="page">
+        <section class="section"></section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

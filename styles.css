@@ -1,0 +1,162 @@
+:root {
+    --icon-size: 48px;
+    --icon-gap: 20px;
+    --grey: #bdbdbd;
+    --white: #ffffff;
+    --columns: 8;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    /* The site body is just grey for now */
+    background: var(--grey);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    overflow-x: hidden;
+}
+
+/* ---------- Loader ---------- */
+.loader {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+/* The white cover, split into vertical columns that slide up */
+.loader-columns {
+    position: absolute;
+    inset: 0;
+    display: flex;
+}
+
+.loader-column {
+    flex: 1;
+    height: 100%;
+    background: var(--white);
+    /* JS toggles .is-revealed to slide each column up */
+    transform: translateY(0);
+    transition: transform 0.7s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.loader-column.is-revealed {
+    transform: translateY(-100%);
+}
+
+/* ---------- Bouncing dots ---------- */
+.loader-icons {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--icon-gap);
+    transition: opacity 0.3s ease;
+}
+
+/* Hide the whole group just before the columns slide away */
+.loader-icons.is-hidden {
+    opacity: 0;
+}
+
+/* Outer wrapper: handles the slide-to-center during merge */
+.loader-dot {
+    display: block;
+    width: var(--icon-size);
+    height: var(--icon-size);
+    transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1),
+        opacity 0.4s ease;
+}
+
+.loader-icon {
+    display: block;
+    width: 100%;
+    height: 100%;
+    /* Each glyph sits at a different height inside its own viewBox,
+       so align on the visual center instead of the box edges. */
+    object-fit: contain;
+    object-position: center;
+    /* Bounce lives here so it never fights the wrapper's merge slide */
+    animation: dot-bounce 0.9s ease-in-out infinite;
+}
+
+/* Stagger each dot so they bounce in sequence */
+.loader-dot:nth-child(1) .loader-icon {
+    animation-delay: 0s;
+}
+.loader-dot:nth-child(2) .loader-icon {
+    animation-delay: 0.15s;
+}
+.loader-dot:nth-child(3) .loader-icon {
+    animation-delay: 0.3s;
+}
+
+@keyframes dot-bounce {
+    0%,
+    80%,
+    100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-20%);
+    }
+}
+
+/* --- Merge: the three dots slide to the shared center and fade out --- */
+.loader-icons.is-merging .loader-icon {
+    /* Stop bouncing and settle on the baseline */
+    animation-play-state: paused;
+}
+
+.loader-icons.is-merging .loader-dot {
+    opacity: 0;
+}
+
+/* Collapse each dot toward the center of the row.
+   Each outer dot travels one icon-width + one gap to reach center. */
+.loader-icons.is-merging .loader-dot:nth-child(1) {
+    transform: translateX(calc(var(--icon-size) + var(--icon-gap)));
+}
+.loader-icons.is-merging .loader-dot:nth-child(2) {
+    transform: translateX(0);
+}
+.loader-icons.is-merging .loader-dot:nth-child(3) {
+    transform: translateX(calc(-1 * (var(--icon-size) + var(--icon-gap))));
+}
+
+/* The single merged mark, hidden until the dots converge */
+.loader-merged {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--icon-size);
+    height: var(--icon-size);
+    object-fit: contain;
+    object-position: center;
+    transform: translate(-50%, -50%) scale(0.6);
+    opacity: 0;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+        opacity 0.4s ease;
+}
+
+/* Pop the merged mark in as the dots arrive at center */
+.loader-icons.is-merging .loader-merged {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    transition-delay: 0.25s;
+}
+
+/* ---------- Page ---------- */
+.page {
+    min-height: 100vh;
+}
+
+.section {
+    min-height: 100vh;
+}
