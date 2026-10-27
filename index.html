@@ -1,15 +1,30 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CETERA</title>
+    <meta
+        name="description"
+        content="CETERA is a design studio that looks beyond the obvious, explores the unfinished, and finds possibilities in the unexpected."
+    />
+
+    <!-- Placeholder typefaces (swap once the studio picks its own). -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=DM+Mono:wght@400;500&display=swap"
+        rel="stylesheet"
+    />
+
     <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-    <!-- Loader overlay: white columns that slide up one-by-one to reveal the site -->
-    <div class="loader" id="loader">
-        <!-- The white columns that move up in a staggered sequence -->
+    <!-- =====================================================
+         LOADER: three dots bounce in a line, merge, then white
+         columns slide up to reveal the site (also reused for the loop).
+         ===================================================== -->
+    <div class="loader" id="loader" aria-hidden="true">
         <div class="loader-columns" id="loaderColumns">
             <span class="loader-column"></span>
             <span class="loader-column"></span>
@@ -21,8 +36,6 @@
             <span class="loader-column"></span>
         </div>
 
-        <!-- Bouncing dots sit on top of the white columns.
-             Outer span = merge slide (JS), inner img = bounce. -->
         <div class="loader-icons" id="loaderIcons">
             <span class="loader-dot">
                 <img class="loader-icon" src="assets/loadericon1.svg" alt="" />
@@ -33,17 +46,411 @@
             <span class="loader-dot">
                 <img class="loader-icon" src="assets/loadericon3.svg" alt="" />
             </span>
-
-            <!-- Single mark the three dots merge into -->
             <img class="loader-merged" src="assets/loadericon2.svg" alt="" />
         </div>
     </div>
 
-    <!-- The site itself (grey body) -->
-    <main class="page" id="page">
-        <section class="section"></section>
+    <!-- =====================================================
+         CHROME: wordmark, step label, three-dot menu
+         ===================================================== -->
+    <header class="chrome">
+        <button class="wordmark" id="wordmark" type="button">CETERA</button>
+
+        <button
+            class="menu-btn"
+            id="menuBtn"
+            type="button"
+            aria-expanded="false"
+            aria-controls="menu"
+        >
+            <span class="menu-btn__label" id="menuLabel">menu</span>
+            <span class="menu-btn__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        </button>
+    </header>
+
+    <nav class="menu" id="menu" aria-label="Sections" inert>
+        <ol class="menu-list" id="menuList"></ol>
+        <p class="menu-note mono">
+            [ placeholder menu &mdash; the isometric version comes later ]
+        </p>
+    </nav>
+
+    <!-- =====================================================
+         SITE: one 2D "world" that is moved step by step.
+         Panels stack vertically. The philosophy panel also
+         moves sideways inside itself (dual axis).
+         ===================================================== -->
+    <main class="viewport" id="viewport">
+        <div class="world" id="world">
+
+            <!-- 0. HERO (KOMASTA placeholder, becomes a video later) -->
+            <section class="panel panel--hero tone-light" data-scope data-label="komasta">
+                <h1 class="hero-title" data-reveal>KOMASTA</h1>
+            </section>
+
+            <!-- 1. WHO EVEN ARE WE: the interruption, what cetera means, then the team.
+                 The panel scrolls a little inside itself, then snaps on to the next one. -->
+            <section class="panel panel--who tone-mid" data-scope data-label="who are we">
+                <div class="scroller">
+                    <div class="who-screen">
+                        <canvas class="dot-grid" aria-hidden="true"></canvas>
+
+                        <div class="who">
+                            <p class="mono" data-reveal style="--i: 0">[ interruption ]</p>
+                            <h2 class="shout" data-reveal style="--i: 1">
+                                BUT WAIT<span class="shout__dash">&mdash;</span><br />
+                                who even are we?
+                            </h2>
+                        </div>
+
+                        <!-- Three dots with faces. Eyes follow the cursor. Click one to change its mood. -->
+                        <div class="faces" aria-hidden="true" data-reveal style="--i: 3">
+                            <div class="face face--a" data-mood="smug">
+                                <div class="eyes">
+                                    <span class="eye"><span class="pupil"></span></span>
+                                    <span class="eye"><span class="pupil"></span></span>
+                                </div>
+                            </div>
+                            <div class="face face--b" data-mood="sleepy">
+                                <div class="eyes">
+                                    <span class="eye"><span class="pupil"></span></span>
+                                    <span class="eye"><span class="pupil"></span></span>
+                                </div>
+                            </div>
+                            <div class="face face--c" data-mood="wide">
+                                <div class="eyes">
+                                    <span class="eye"><span class="pupil"></span></span>
+                                    <span class="eye"><span class="pupil"></span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="who-intro">
+                        <div class="intro">
+                            <!-- Dictionary-style entry. The pronunciation is DRAFT copy: confirm how CETERA is said. -->
+                            <article class="dict" data-sreveal style="--i: 0">
+                                <header class="dict__head">
+                                    <h3 class="dict__word">cetera</h3>
+                                    <span class="dict__pron">/&#712;s&#603;t.&#601;r.&#601;/</span>
+                                    <span class="dict__pos">noun</span>
+                                </header>
+
+                                <p class="dict__def">
+                                    the rest; all the remaining things.
+                                    <span class="dict__origin">[from the Latin <em>et c&#275;tera</em>, &ldquo;and the rest.&rdquo;]</span>
+                                </p>
+                            </article>
+                            <!-- GRAPHIC SLOT: drop an asset in here, e.g.
+                                 <img src="assets/intro-graphic.svg" alt="" />
+                                 (img / svg / video all fill the slot) -->
+                            <figure class="art" data-sreveal style="--i: 2" aria-hidden="true">
+                                <span class="art__placeholder mono">[ graphic goes here ]</span>
+                            </figure>
+
+                            <h2 class="shout shout--xl intro__head" data-sreveal style="--i: 3">
+                                There is<br />always more.
+                            </h2>
+
+                            <p class="body intro__body" data-sreveal style="--i: 4">
+                                A design studio that looks beyond the obvious, explores the
+                                unfinished, and finds possibilities in the unexpected. It does
+                                not assume that there is one right answer or a final destination.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="team">
+                        <header class="section-head">
+                            <h2 class="big" data-sreveal style="--i: 0">the team</h2>
+                            <p class="mono" data-sreveal style="--i: 1">[ five people, placeholders for now ]</p>
+                        </header>
+
+                        <div class="members">
+                            <figure class="member" data-sreveal style="--i: 1">
+                                <div class="avatar"><span class="mono">photo</span></div>
+                                <figcaption><strong>Name Surname</strong><span class="mono">role</span></figcaption>
+                            </figure>
+                            <figure class="member" data-sreveal style="--i: 2">
+                                <div class="avatar"><span class="mono">photo</span></div>
+                                <figcaption><strong>Name Surname</strong><span class="mono">role</span></figcaption>
+                            </figure>
+                            <figure class="member" data-sreveal style="--i: 3">
+                                <div class="avatar"><span class="mono">photo</span></div>
+                                <figcaption><strong>Name Surname</strong><span class="mono">role</span></figcaption>
+                            </figure>
+                            <figure class="member" data-sreveal style="--i: 4">
+                                <div class="avatar"><span class="mono">photo</span></div>
+                                <figcaption><strong>Name Surname</strong><span class="mono">role</span></figcaption>
+                            </figure>
+                            <figure class="member" data-sreveal style="--i: 5">
+                                <div class="avatar"><span class="mono">photo</span></div>
+                                <figcaption><strong>Name Surname</strong><span class="mono">role</span></figcaption>
+                            </figure>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. PHILOSOPHY: dual-axis. 01 -> (right) 02 -> (down) 03 -->
+            <section class="panel panel--philosophy" data-label="philosophy">
+                <svg class="minimap" id="minimap" viewBox="0 0 64 64" aria-hidden="true">
+                    <path d="M12 12 H52 V52" class="minimap__path" />
+                    <circle data-node="0" cx="12" cy="12" r="5" />
+                    <circle data-node="1" cx="52" cy="12" r="5" />
+                    <circle data-node="2" cx="52" cy="52" r="5" />
+                </svg>
+
+                <div class="stage" id="stage">
+                    <!-- TITLE CARD: the chapter opener. The big words sit in .ph-sweep, which
+                         script.js drives (via --ph) so they get swept up and away as you move to 01. -->
+                    <article
+                        class="cell cell--cover"
+                        data-scope
+                        data-x="0"
+                        data-y="0"
+                        style="grid-column: 1; grid-row: 1"
+                    >
+                        <div class="ph-sweep">
+                            <p class="mono" data-reveal style="--i: 0">cetera as a</p>
+                            <h2 class="shout shout--xl ph-cover__title" data-reveal style="--i: 1">
+                                design<br />philosophy
+                            </h2>
+                        </div>
+
+                        <!-- the three ideas, as three dots -->
+                        <ol class="ph-toc">
+                            <li data-reveal style="--i: 3"><i aria-hidden="true"></i><span class="mono">01</span> beyond the obvious</li>
+                            <li data-reveal style="--i: 4"><i aria-hidden="true"></i><span class="mono">02</span> unexpected connections</li>
+                            <li data-reveal style="--i: 5"><i aria-hidden="true"></i><span class="mono">03</span> more than one way</li>
+                        </ol>
+                    </article>
+                    <!-- 01 -->
+                    <article
+                        class="cell cell--1"
+                        data-scope
+                        data-x="0"
+                        data-y="1"
+                        style="grid-column: 1; grid-row: 2"
+                    >
+                        <p class="ph-tag mono" data-reveal style="--i: 0">
+                            <span class="ph-tag__dots" aria-hidden="true"><i class="on"></i><i></i><i></i></span>
+                            <span>design philosophy</span>
+                            <span class="ph-tag__num">01 / 03</span>
+                        </p>
+
+                        <h3 class="ph-title ph-title--beyond" data-reveal style="--i: 1">
+                            <span class="beyond">Beyond</span>
+                            <span class="frame">the obvious.</span>
+                        </h3>
+
+                        <p class="body ph-body" data-reveal style="--i: 3">
+                            The first idea isn&rsquo;t always the best one. Look further,
+                            question assumptions, and find what others might overlook.
+                        </p>
+
+                    </article>
+
+                    <!-- 02 -->
+                    <article
+                        class="cell cell--2"
+                        data-scope
+                        data-x="1"
+                        data-y="1"
+                        style="grid-column: 2; grid-row: 2"
+                    >
+                        <p class="ph-tag mono" data-reveal style="--i: 0">
+                            <span class="ph-tag__dots" aria-hidden="true"><i></i><i class="on"></i><i></i></span>
+                            <span>design philosophy</span>
+                            <span class="ph-tag__num">02 / 03</span>
+                        </p>
+
+                        <h3 class="ph-title ph-title--connect" data-reveal style="--i: 1" id="connectTitle">
+                            <svg class="connect-svg" id="connectSvg" aria-hidden="true">
+                                <path id="connectPath" class="connect-path" d="" />
+                            </svg>
+                            <span class="w w1">Unexpected<i class="node" id="nodeA"></i></span>
+                            <span class="w w2"><i class="node" id="nodeB"></i>connections.</span>
+                        </h3>
+
+                        <p class="body ph-body" data-reveal style="--i: 3">
+                            New ideas often emerge when seemingly unrelated things come
+                            together. CETERA is about finding those connections and turning
+                            them into something meaningful.
+                        </p>
+
+                    </article>
+
+                    <!-- 03 -->
+                    <article
+                        class="cell cell--3"
+                        data-scope
+                        data-x="1"
+                        data-y="2"
+                        style="grid-column: 2; grid-row: 3"
+                    >
+                        <p class="ph-tag mono" data-reveal style="--i: 0">
+                            <span class="ph-tag__dots" aria-hidden="true"><i></i><i></i><i class="on"></i></span>
+                            <span>design philosophy</span>
+                            <span class="ph-tag__num">03 / 03</span>
+                        </p>
+
+                        <h3 class="ph-title ph-title--way" data-reveal style="--i: 1">
+                            More than one
+                            <span class="ways">
+                                <span>way.</span>
+                                <span aria-hidden="true">way.</span>
+                                <span aria-hidden="true">way.</span>
+                            </span>
+                        </h3>
+
+                        <p class="body ph-body" data-reveal style="--i: 3">
+                            There is rarely only one way to approach a problem. Different
+                            perspectives open up different possibilities, and the right
+                            direction comes from exploring them.
+                        </p>
+
+                    </article>
+                </div>
+            </section>
+
+            <!-- 4. SERVICES -->
+            <section class="panel panel--services tone-mid" data-scope data-label="services">
+                <div class="services">
+                    <header class="section-head">
+                        <h2 class="big" data-reveal style="--i: 0">services</h2>
+                    </header>
+
+                    <div class="svc-grid">
+                        <article class="svc" data-reveal style="--i: 2">
+                            <div class="svc__in">
+                            <p class="svc__num mono">01</p>
+                            <h3 class="svc__title">Brand<span class="star" aria-hidden="true">*</span></h3>
+                            <ul>
+                                <li>Brand Strategy &amp; Positioning</li>
+                                <li>Brand Identity</li>
+                            </ul>
+                            </div>
+                        </article>
+
+                        <article class="svc" data-reveal style="--i: 3">
+                            <div class="svc__in">
+                            <p class="svc__num mono">02</p>
+                            <h3 class="svc__title">Digital &amp; Product<span class="star" aria-hidden="true">*</span></h3>
+                            <ul>
+                                <li>UI/UX Design</li>
+                                <li>Product Packaging</li>
+                            </ul>
+                            </div>
+                        </article>
+
+                        <article class="svc" data-reveal style="--i: 4">
+                            <div class="svc__in">
+                            <p class="svc__num mono">03</p>
+                            <h3 class="svc__title">Research &amp; Strategy<span class="star" aria-hidden="true">*</span></h3>
+                            <ul>
+                                <li>Design &amp; User Research</li>
+                                <li>Market &amp; Trend Research</li>
+                            </ul>
+                            </div>
+                        </article>
+
+                        <article class="svc" data-reveal style="--i: 5">
+                            <div class="svc__in">
+                            <p class="svc__num mono">04</p>
+                            <h3 class="svc__title">Culture &amp; Communication<span class="star" aria-hidden="true">*</span></h3>
+                            <ul>
+                                <li>Campaign Design</li>
+                                <li>Social Media Identity</li>
+                                <li>Creative Direction</li>
+                            </ul>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. CONTACT
+                 "you come to us...." / [contact] = the way in / "...and the rest is on us".
+                 All contact values below are PLACEHOLDERS. -->
+            <section class="panel panel--contact tone-dark" data-scope data-label="contact">
+                <div class="scroller">
+                    <div class="contact-screen">
+                        <canvas class="dot-grid" aria-hidden="true"></canvas>
+
+                        <div class="contact">
+                            <h2 class="shout c-line c-line--1" data-reveal style="--i: 0">you come to us&hellip;.</h2>
+
+                            <div class="reach" data-reveal style="--i: 2">
+                                <p class="reach__label mono">[contact]</p>
+
+                                <div class="reach__cols">
+                                    <ul class="channels">
+                                        <li>
+                                            <span class="mono">email</span>
+                                            <a href="#" data-placeholder>[ studio email ]</a>
+                                        </li>
+                                        <li>
+                                            <span class="mono">instagram</span>
+                                            <a href="#" data-placeholder>[ @handle ]</a>
+                                        </li>
+                                        <li>
+                                            <span class="mono">linkedin</span>
+                                            <a href="#" data-placeholder>[ page ]</a>
+                                        </li>
+                                    </ul>
+
+                                    <form class="form" id="contactForm" novalidate>
+                                        <label class="field">
+                                            <span class="mono">name</span>
+                                            <input type="text" name="name" autocomplete="name" required />
+                                        </label>
+                                        <label class="field">
+                                            <span class="mono">email</span>
+                                            <input type="email" name="email" autocomplete="email" required />
+                                        </label>
+                                        <label class="field field--wide">
+                                            <span class="mono">what are you working on?</span>
+                                            <textarea name="message" rows="3" required></textarea>
+                                        </label>
+                                        <div class="form__foot">
+                                            <button class="send" type="submit">send &rarr;</button>
+                                            <p class="form-status mono" id="formStatus" role="status" aria-live="polite"></p>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <h2 class="shout c-line c-line--3" data-reveal style="--i: 4">&hellip;and the rest is on us</h2>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
     </main>
+
+    <!-- =====================================================
+         FOOTER SHEET: lives off-screen below the page. At the end of the contact
+         panel the scroll "pulls" it up from the bottom; past a point it snaps to
+         fill the screen, the CETERA stack rises, tiles cover, and the page jumps
+         back to the top. Wordmark font is a PLACEHOLDER (see --font-wordmark).
+         ===================================================== -->
+    <div class="footer-sheet" id="footer" aria-hidden="true">
+        <div class="echo">
+            <span class="echo__row" style="--o: 0.16">CETERA</span>
+            <span class="echo__row" style="--o: 0.3">CETERA</span>
+            <span class="echo__row" style="--o: 0.55">CETERA</span>
+            <span class="echo__row echo__row--main">CETERA</span>
+            <span class="echo__row" style="--o: 0.55">CETERA</span>
+            <span class="echo__row" style="--o: 0.3">CETERA</span>
+            <span class="echo__row" style="--o: 0.16">CETERA</span>
+        </div>
+        <p class="footer-meta mono">there is always more &mdash; &copy; 2026 cetera</p>
+    </div>
 
     <script src="script.js"></script>
 </body>
 </html>
+
+

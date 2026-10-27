@@ -1,9 +1,35 @@
-:root {
+﻿:root {
+    /* loader */
     --icon-size: 48px;
     --icon-gap: 20px;
+
+    /* palette: greys + ink, nothing else (for now) */
+    --ink: #111111;
+    --paper: #f4f4f4;
+    --g1: #d4d4d4;
+    --g2: #a0a0a0;
+    --g3: #5e5e5e;
+    --g4: #454545;
+    --g5: #2f2f2f;
     --grey: #bdbdbd;
     --white: #ffffff;
-    --columns: 8;
+
+    /* type */
+    --font-display: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "DM Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    /* PLACEHOLDER slab for the CETERA wordmark. Swap for the real brand font. */
+    --font-wordmark: "Alfa Slab One", Rockwell, "Roboto Slab", Georgia, serif;
+    /* dictionary-entry serif */
+    --font-serif: "Newsreader", Georgia, "Times New Roman", serif;
+
+    /* motion */
+    --ease: cubic-bezier(0.76, 0, 0.24, 1);
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    /* snap: moves fast the instant it is released, then settles (no slow start) */
+    --snap: cubic-bezier(0.22, 1, 0.36, 1);
+    --dur: 1.1s; /* set per move from script.js */
+
+    --pad: clamp(20px, 4vw, 56px);
 }
 
 * {
@@ -15,13 +41,40 @@
 html,
 body {
     height: 100%;
-    /* The site body is just grey for now */
     background: var(--grey);
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    overflow-x: hidden;
+    color: var(--ink);
+    font-family: var(--font-display);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
 }
 
-/* ---------- Loader ---------- */
+button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    cursor: pointer;
+}
+
+a {
+    color: inherit;
+}
+
+.mono {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
+}
+
+:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 4px;
+}
+
+/* =========================================================
+   LOADER
+   ========================================================= */
 .loader {
     position: fixed;
     inset: 0;
@@ -29,7 +82,6 @@ body {
     pointer-events: none;
 }
 
-/* The white cover, split into vertical columns that slide up */
 .loader-columns {
     position: absolute;
     inset: 0;
@@ -40,7 +92,6 @@ body {
     flex: 1;
     height: 100%;
     background: var(--white);
-    /* JS toggles .is-revealed to slide each column up */
     transform: translateY(0);
     transition: transform 0.7s cubic-bezier(0.65, 0, 0.35, 1);
 }
@@ -49,7 +100,6 @@ body {
     transform: translateY(-100%);
 }
 
-/* ---------- Bouncing dots ---------- */
 .loader-icons {
     position: absolute;
     inset: 0;
@@ -60,33 +110,26 @@ body {
     transition: opacity 0.3s ease;
 }
 
-/* Hide the whole group just before the columns slide away */
 .loader-icons.is-hidden {
     opacity: 0;
 }
 
-/* Outer wrapper: handles the slide-to-center during merge */
 .loader-dot {
     display: block;
     width: var(--icon-size);
     height: var(--icon-size);
-    transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1),
-        opacity 0.4s ease;
+    transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.4s ease;
 }
 
 .loader-icon {
     display: block;
     width: 100%;
     height: 100%;
-    /* Each glyph sits at a different height inside its own viewBox,
-       so align on the visual center instead of the box edges. */
     object-fit: contain;
     object-position: center;
-    /* Bounce lives here so it never fights the wrapper's merge slide */
     animation: dot-bounce 0.9s ease-in-out infinite;
 }
 
-/* Stagger each dot so they bounce in sequence */
 .loader-dot:nth-child(1) .loader-icon {
     animation-delay: 0s;
 }
@@ -108,9 +151,7 @@ body {
     }
 }
 
-/* --- Merge: the three dots slide to the shared center and fade out --- */
 .loader-icons.is-merging .loader-icon {
-    /* Stop bouncing and settle on the baseline */
     animation-play-state: paused;
 }
 
@@ -118,8 +159,6 @@ body {
     opacity: 0;
 }
 
-/* Collapse each dot toward the center of the row.
-   Each outer dot travels one icon-width + one gap to reach center. */
 .loader-icons.is-merging .loader-dot:nth-child(1) {
     transform: translateX(calc(var(--icon-size) + var(--icon-gap)));
 }
@@ -130,7 +169,6 @@ body {
     transform: translateX(calc(-1 * (var(--icon-size) + var(--icon-gap))));
 }
 
-/* The single merged mark, hidden until the dots converge */
 .loader-merged {
     position: absolute;
     top: 50%;
@@ -141,22 +179,1292 @@ body {
     object-position: center;
     transform: translate(-50%, -50%) scale(0.6);
     opacity: 0;
-    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
-        opacity 0.4s ease;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
 }
 
-/* Pop the merged mark in as the dots arrive at center */
 .loader-icons.is-merging .loader-merged {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
     transition-delay: 0.25s;
 }
 
-/* ---------- Page ---------- */
-.page {
-    min-height: 100vh;
+/* =========================================================
+   CHROME (wordmark, label, menu button)
+   ========================================================= */
+.chrome {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: calc(var(--pad) * 0.6) var(--pad);
+    color: #fff;
+    mix-blend-mode: difference; /* stays readable on every grey */
+    pointer-events: none;
 }
 
-.section {
-    min-height: 100vh;
+.chrome > * {
+    pointer-events: auto;
 }
+
+.wordmark {
+    font-family: var(--font-wordmark);
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    font-size: 1rem;
+}
+
+.menu-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+}
+
+.menu-btn__dots {
+    display: flex;
+    gap: 5px;
+}
+
+.menu-btn__dots i {
+    display: block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: currentColor;
+    transition: transform 0.6s var(--ease);
+}
+
+.menu-btn:hover .menu-btn__dots i {
+    animation: dot-bounce 0.7s ease-in-out infinite;
+}
+.menu-btn:hover .menu-btn__dots i:nth-child(2) {
+    animation-delay: 0.1s;
+}
+.menu-btn:hover .menu-btn__dots i:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+/* open: the dots merge into one, echoing the loader */
+.menu-btn[aria-expanded="true"] .menu-btn__dots i:nth-child(1) {
+    transform: translateX(14px);
+}
+.menu-btn[aria-expanded="true"] .menu-btn__dots i:nth-child(3) {
+    transform: translateX(-14px);
+}
+
+/* =========================================================
+   MENU (simple for now)
+   ========================================================= */
+.menu {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    background: var(--ink);
+    color: var(--paper);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--pad);
+    clip-path: inset(0 0 100% 0);
+    visibility: hidden;
+    transition: clip-path 0.8s var(--ease), visibility 0s linear 0.8s;
+}
+
+.menu.is-open {
+    clip-path: inset(0 0 0 0);
+    visibility: visible;
+    transition: clip-path 0.8s var(--ease), visibility 0s;
+}
+
+.menu-list {
+    list-style: none;
+}
+
+.menu-list button {
+    display: flex;
+    align-items: baseline;
+    gap: 1.2rem;
+    padding: 0.15em 0;
+    font-size: clamp(2rem, 7vw, 5rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    text-align: left;
+    opacity: 0.55;
+    transition: opacity 0.3s ease, transform 0.5s var(--ease-out);
+}
+
+.menu-list button:hover,
+.menu-list button:focus-visible,
+.menu-list button[aria-current="step"] {
+    opacity: 1;
+    transform: translateX(0.4em);
+}
+
+.menu-list .mono {
+    font-size: 0.78rem;
+    font-weight: 400;
+}
+
+.menu-note {
+    margin-top: 2.5rem;
+    opacity: 0.5;
+}
+
+/* =========================================================
+   WORLD / PANELS
+   ========================================================= */
+.viewport {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    touch-action: none;
+}
+
+.world {
+    will-change: transform; /* moved every frame by script.js, 1:1 with the wheel / finger */
+}
+.panel {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    padding: var(--pad);
+    padding-top: calc(var(--pad) + 2.2rem);
+}
+
+.tone-light {
+    background: var(--g1);
+}
+.tone-mid {
+    background: var(--g2);
+}
+.tone-dark {
+    background: var(--g3);
+    color: var(--paper);
+}
+.tone-ink {
+    background: var(--ink);
+    color: var(--paper);
+}
+
+/* reveal: elements fade/rise when their scope becomes current */
+[data-reveal] {
+    opacity: 0;
+    transform: translate3d(0, 1.4rem, 0);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.is-current [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.8s ease calc(0.45s + var(--i, 0) * 0.09s),
+        transform 1s var(--ease-out) calc(0.45s + var(--i, 0) * 0.09s);
+}
+
+/* shared type */
+.shout {
+    font-weight: 700;
+    font-size: clamp(2.4rem, 8.5vw, 7.5rem);
+    line-height: 0.92;
+    letter-spacing: -0.035em;
+}
+
+.shout--xl {
+    font-size: clamp(3rem, 11vw, 10rem);
+}
+
+.big {
+    font-weight: 700;
+    font-size: clamp(2.4rem, 7vw, 6rem);
+    letter-spacing: -0.035em;
+    line-height: 0.95;
+}
+
+.body {
+    font-size: clamp(1rem, 1.25vw, 1.2rem);
+    line-height: 1.5;
+    max-width: 36em;
+}
+
+.section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 1.2rem;
+    margin-bottom: clamp(1.2rem, 4vh, 3rem);
+}
+
+/* A panel that scrolls a little on its own. script.js lets it scroll natively,
+   then hands the next gesture to the step navigation ("snap to the next one"). */
+.scroller {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    touch-action: pan-y;
+}
+
+.scroller::-webkit-scrollbar {
+    display: none;
+}
+
+/* scroll-triggered reveal (fires when the element enters the scroller) */
+[data-sreveal] {
+    opacity: 0;
+    transform: translate3d(0, 2rem, 0);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+[data-sreveal].is-seen {
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.8s ease calc(var(--i, 0) * 0.09s),
+        transform 1s var(--ease-out) calc(var(--i, 0) * 0.09s);
+}
+
+/* dot grid canvases (cursor-avoiding) */
+.dot-grid {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    color: rgba(0, 0, 0, 0.32);
+}
+
+.tone-dark .dot-grid {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* =========================================================
+   0. HERO
+   ========================================================= */
+.panel--hero {
+    display: grid;
+    place-items: center;
+}
+
+.hero-title {
+    font-weight: 600;
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    letter-spacing: 0.2em;
+}
+
+/* =========================================================
+   1. WHO ARE WE
+   ========================================================= */
+.panel--who {
+    padding: 0;
+}
+
+.who-screen {
+    position: relative;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: var(--pad);
+    padding-top: calc(var(--pad) + 2.2rem);
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    align-items: center;
+    gap: 2rem;
+}
+
+.who {
+    position: relative;
+    z-index: 1;
+}
+
+.who .mono {
+    margin-bottom: 1.2rem;
+}
+
+.shout__dash {
+    display: inline-block;
+    margin-left: 0.2em;
+}
+
+.faces {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(8px, 1.6vw, 26px);
+}
+
+.face {
+    --s: clamp(76px, 12.5vw, 200px);
+    --face: #111;
+    --lid: 0;
+    --tilt: 0deg;
+    --lift: 0%;
+    position: relative;
+    flex: none;
+    width: var(--s);
+    height: var(--s);
+    border-radius: 50%;
+    background: var(--face);
+    cursor: pointer;
+    transform: translateY(var(--lift));
+    transition: transform 0.6s var(--ease-out);
+}
+
+.face--a {
+    --lift: -14%;
+}
+.face--b {
+    --s: clamp(90px, 15vw, 240px);
+    --lift: 8%;
+}
+.face--c {
+    --s: clamp(64px, 10vw, 160px);
+    --lift: -4%;
+}
+
+.face:hover {
+    transform: translateY(var(--lift)) scale(1.05);
+}
+
+.eyes {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9%;
+}
+
+.eye {
+    position: relative;
+    width: 31%;
+    aspect-ratio: 1.12;
+    border-radius: 50%;
+    background: var(--paper);
+    overflow: hidden;
+    transition: transform 0.09s linear;
+}
+
+.eye:first-child {
+    --t: 1;
+}
+.eye:last-child {
+    --t: -1;
+}
+
+/* eyelid: gives each mood its expression */
+.eye::after {
+    content: "";
+    position: absolute;
+    top: -20%;
+    left: -20%;
+    right: -20%;
+    height: calc(var(--lid) * 100% + 20%);
+    background: var(--face);
+    transform: rotate(calc(var(--tilt) * var(--t)));
+    transform-origin: center top;
+    transition: height 0.35s var(--ease-out), transform 0.35s var(--ease-out);
+}
+
+.pupil {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 46%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--face);
+    transform: translate(calc(-50% + var(--px, 0px)), calc(-50% + var(--py, 0px)));
+    transition: transform 0.18s ease-out;
+}
+
+.face.is-blink .eye {
+    transform: scaleY(0.08);
+}
+
+.face[data-mood="smug"] {
+    --lid: 0.38;
+    --tilt: 16deg;
+}
+.face[data-mood="sleepy"] {
+    --lid: 0.55;
+    --tilt: 0deg;
+}
+.face[data-mood="wide"] {
+    --lid: 0;
+    --tilt: 0deg;
+}
+.face[data-mood="squint"] {
+    --lid: 0.5;
+    --tilt: -14deg;
+}
+
+/* hover = surprised */
+.face[data-mood]:hover {
+    --lid: 0;
+    --tilt: 0deg;
+}
+
+/* =========================================================
+   2. INTRO
+   ========================================================= */
+.who-intro {
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: var(--pad);
+    padding-top: calc(var(--pad) + 2.2rem);
+    display: flex;
+    align-items: center;
+    background: var(--g1);
+}
+
+.intro {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+        "dict art"
+        "head head"
+        "body body";
+    gap: clamp(1.5rem, 4vh, 3rem) clamp(1.5rem, 5vw, 5rem);
+    align-items: start;
+}
+
+.intro__head {
+    grid-area: head;
+}
+
+.intro__body {
+    grid-area: body;
+}
+
+/* ---- dictionary entry ---- */
+.dict {
+    grid-area: dict;
+    max-width: 34rem;
+    font-family: var(--font-serif);
+    border-top: 3px solid var(--ink);
+    padding-top: 0.9rem;
+}
+
+.dict__head {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.3rem 1rem;
+}
+
+.dict__word {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: clamp(2.2rem, 4.6vw, 3.8rem);
+    letter-spacing: -0.02em;
+    line-height: 1;
+}
+
+.dict__pron {
+    font-size: 1.05rem;
+    opacity: 0.75;
+}
+
+.dict__pos {
+    font-style: italic;
+    font-size: 1.05rem;
+}
+
+.dict__def {
+    margin-top: 0.9rem;
+    font-size: clamp(1.05rem, 1.35vw, 1.25rem);
+    line-height: 1.45;
+}
+
+/* the origin runs on from the definition, in brackets like the rest of the site's notes */
+.dict__origin {
+    font-style: italic;
+    opacity: 0.7;
+}
+/* ---- graphic slot: drop an img / svg / video in and it fills the space ---- */
+.art {
+    grid-area: art;
+    justify-self: end;
+    width: 100%;
+    height: clamp(180px, 34dvh, 360px);
+    display: grid;
+    place-items: center;
+    border: 1.5px dashed rgba(17, 17, 17, 0.45);
+}
+
+.art > img,
+.art > svg,
+.art > video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.art:has(> img, > svg, > video) {
+    border: 0;
+}
+
+.art__placeholder {
+    opacity: 0.6;
+}
+
+/* =========================================================
+   3. PHILOSOPHY (dual axis)
+   ========================================================= */
+.panel--philosophy {
+    padding: 0;
+    background: var(--g4);
+    color: var(--paper);
+}
+
+.minimap {
+    position: absolute;
+    z-index: 3;
+    right: var(--pad);
+    bottom: calc(var(--pad) * 0.6);
+    width: 56px;
+    height: 56px;
+    color: var(--paper);
+}
+
+.minimap__path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-dasharray: 2 4;
+    opacity: 0.6;
+}
+
+.minimap circle {
+    fill: transparent;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    transition: fill 0.4s ease;
+}
+
+.minimap circle.is-on {
+    fill: currentColor;
+}
+
+.stage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 300%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    will-change: transform;
+}
+
+.cell {
+    --bg: var(--g3);
+    position: relative;
+    padding: var(--pad);
+    padding-top: calc(var(--pad) + 2.2rem);
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: clamp(1rem, 3vh, 2rem);
+    overflow: hidden;
+}
+
+/* ---- persistent tag on every philosophy cell: "● ○ ○  design philosophy  01 / 03" ---- */
+.ph-tag {
+    position: absolute;
+    top: calc(var(--pad) + 2.6rem);
+    left: var(--pad);
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.ph-tag__dots {
+    display: flex;
+    gap: 5px;
+}
+
+.ph-tag__dots i {
+    display: block;
+    width: 10px;
+    height: 10px;
+    border: 1.5px solid currentColor;
+    border-radius: 50%;
+}
+
+.ph-tag__dots i.on {
+    background: currentColor;
+}
+
+.ph-tag__num {
+    opacity: 0.6;
+}
+
+/* ---- title card: the chapter opener, in black ---- */
+.cell--cover {
+    --bg: var(--ink);
+}
+
+/* The big words are swept up and away as the camera moves on to 01: script.js sets --ph
+   (0 on the card, 1 on 01) every frame, so it follows the scroll exactly. */
+.ph-sweep {
+    transform: translate3d(0, calc(var(--ph, 0) * -55vh), 0);
+    opacity: calc(1 - var(--ph, 0) * 1.1);
+    will-change: transform, opacity;
+}
+
+.ph-sweep .mono {
+    margin-bottom: 1rem;
+}
+
+.ph-cover__title {
+    font-size: clamp(3.4rem, 12.5vw, 11.5rem);
+}
+
+.ph-toc {
+    position: absolute;
+    left: var(--pad);
+    right: var(--pad);
+    bottom: calc(var(--pad) * 0.9);
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem clamp(1.2rem, 4vw, 3.5rem);
+    font-size: clamp(0.95rem, 1.25vw, 1.2rem);
+    font-weight: 500;
+}
+
+.ph-toc li {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.ph-toc i {
+    display: block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.ph-toc .mono {
+    opacity: 0.6;
+}
+.cell--1 {
+    --bg: var(--g3);
+}
+.cell--2 {
+    --bg: var(--g4);
+}
+.cell--3 {
+    --bg: var(--g5);
+}
+
+.ph-title {
+    font-weight: 700;
+    font-size: clamp(2.6rem, 8.5vw, 8rem);
+    line-height: 0.95;
+    letter-spacing: -0.035em;
+}
+
+.ph-body {
+    opacity: 0.85;
+}
+
+/* 01: a word that breaks out of its frame, plus a dot outside it */
+.ph-title--beyond {
+    position: relative;
+    width: max-content;
+    max-width: 100%;
+    padding-top: 0.45em;
+}
+
+.beyond {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 42%;
+    padding: 0 0.12em;
+    background: var(--bg);
+    transform: translateY(0.06em);
+    transition: transform 1.2s var(--ease-out) 1s;
+}
+
+.frame {
+    position: relative;
+    display: inline-block;
+    border: 2px solid currentColor;
+    padding: 0.32em 0.28em 0.16em;
+    margin-top: 0.2em;
+}
+
+/* the dot that got out */
+.frame::after {
+    content: "";
+    position: absolute;
+    top: -0.52em;
+    right: -0.62em;
+    width: 0.26em;
+    height: 0.26em;
+    border-radius: 50%;
+    background: currentColor;
+    transform: scale(0);
+    transition: transform 0.7s var(--ease-out) 1.4s;
+}
+
+.cell.is-current .frame::after {
+    transform: scale(1);
+}
+
+.cell.is-current .beyond {
+    transform: translate(0.5em, -0.38em);
+}
+
+/* 02: two words, joined by a drawn line between two nodes */
+.ph-title--connect {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: max-content;
+    max-width: 100%;
+}
+
+.ph-title--connect .w {
+    position: relative;
+    display: inline-block;
+}
+
+.ph-title--connect .w2 {
+    margin-left: clamp(3rem, 16vw, 15rem);
+}
+
+.node {
+    position: absolute;
+    width: 0.2em;
+    height: 0.2em;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+#nodeA {
+    right: -0.28em;
+    bottom: 0.2em;
+}
+#nodeB {
+    left: -0.28em;
+    top: 0.18em;
+}
+
+.connect-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+}
+
+.connect-path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-dasharray: var(--len, 600);
+    stroke-dashoffset: var(--len, 600);
+    transition: stroke-dashoffset 1.3s var(--ease) 0.2s;
+}
+
+.cell.is-current .connect-path {
+    stroke-dashoffset: 0;
+    transition-delay: 1.1s;
+}
+
+/* 03: one word, many directions */
+.ph-title--way .ways {
+    display: inline-grid;
+    vertical-align: top;
+}
+
+.ways > span {
+    grid-area: 1 / 1;
+    transform-origin: 0 100%;
+    transition: transform 1.2s var(--ease-out) 1.1s;
+}
+
+.ways > span:nth-child(n + 2) {
+    color: transparent;
+    -webkit-text-stroke: 2px currentColor;
+}
+
+.cell.is-current .ways > span:nth-child(2) {
+    transform: rotate(-13deg);
+}
+.cell.is-current .ways > span:nth-child(3) {
+    transform: rotate(13deg);
+}
+
+/* =========================================================
+   4. SERVICES
+   ========================================================= */
+.panel--services {
+    display: flex;
+    align-items: center;
+}
+
+.services {
+    width: 100%;
+}
+
+.svc-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(1rem, 2vw, 2rem);
+}
+
+.svc {
+    min-height: clamp(150px, 34vh, 340px);
+}
+
+/* The card itself carries the scroll-reveal (opacity + a ~1s delay). Hover must not share that
+   property, or it inherits the delay and feels broken, so it lives on this inner wrapper. */
+.svc__in {
+    height: 100%;
+    border-top: 2px solid var(--ink);
+    padding-top: 0.9rem;
+    transition: opacity 0.2s ease;
+}
+
+.svc-grid:hover .svc__in {
+    opacity: 0.4;
+}
+.svc-grid .svc:hover .svc__in {
+    opacity: 1;
+}
+.svc__num {
+    margin-bottom: 0.8rem;
+}
+
+.svc__title {
+    font-size: clamp(1.3rem, 2.3vw, 2.2rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 1rem;
+}
+
+.star {
+    display: inline-block;
+    margin-left: 0.15em;
+    font-family: var(--font-mono);
+    transition: transform 0.5s var(--ease-out);
+}
+
+.svc:hover .star {
+    transform: rotate(180deg);
+}
+
+.svc ul {
+    list-style: none;
+    display: grid;
+    gap: 0.35rem;
+    font-size: clamp(0.95rem, 1.1vw, 1.1rem);
+}
+
+/* =========================================================
+   TEAM (lives inside the "who even are we" panel, below the fold)
+   ========================================================= */
+.team {
+    min-height: 92vh;
+    min-height: 92dvh;
+    padding: var(--pad);
+    padding-top: calc(var(--pad) * 1.4);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: var(--grey);
+}
+
+.members {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: clamp(0.5rem, 2vw, 2rem);
+}
+
+.member {
+    flex: 1;
+    min-width: 0;
+}
+
+/* deliberately not on one line */
+.member:nth-child(1) {
+    margin-top: 0;
+}
+.member:nth-child(2) {
+    margin-top: 6vh;
+}
+.member:nth-child(3) {
+    margin-top: 1.5vh;
+}
+.member:nth-child(4) {
+    margin-top: 8vh;
+}
+.member:nth-child(5) {
+    margin-top: 3vh;
+}
+
+.avatar {
+    width: 100%;
+    max-width: 200px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--g2);
+    display: grid;
+    place-items: center;
+    margin-bottom: 0.9rem;
+    transition: transform 0.7s var(--ease-out);
+}
+
+.member:hover .avatar {
+    transform: scale(1.06) rotate(-4deg);
+}
+
+.member figcaption {
+    display: grid;
+    gap: 0.15rem;
+}
+
+/* =========================================================
+   6. CONTACT
+   ========================================================= */
+.panel--contact {
+    padding: 0;
+}
+
+.contact-screen {
+    position: relative;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: var(--pad);
+    padding-top: calc(var(--pad) + 2.2rem);
+    display: flex;
+    align-items: center;
+}
+
+.contact {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    display: grid;
+    gap: clamp(1rem, 3.5vh, 2.4rem);
+}
+
+.c-line {
+    font-size: clamp(2rem, 5.6vw, 5.4rem);
+}
+
+.c-line--3 {
+    justify-self: end;
+    text-align: right;
+}
+
+/* [contact]: the label for the way in, sitting between the two lines */
+.reach {
+    display: grid;
+    gap: 1rem;
+    padding: clamp(1rem, 2.4vw, 1.8rem) 0;
+    border-top: 1px solid rgba(244, 244, 244, 0.45);
+    border-bottom: 1px solid rgba(244, 244, 244, 0.45);
+}
+
+.reach__label {
+    font-size: clamp(0.9rem, 1.4vw, 1.2rem);
+    font-weight: 500;
+}
+
+.reach__cols {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: clamp(1.5rem, 5vw, 5rem);
+    align-items: start;
+}
+
+.channels {
+    list-style: none;
+    display: grid;
+    gap: 1rem;
+}
+
+.channels li {
+    display: grid;
+    gap: 0.15rem;
+}
+
+.channels a {
+    width: max-content;
+    max-width: 100%;
+    font-size: clamp(1.1rem, 2vw, 1.7rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.3s ease;
+}
+
+.channels a:hover,
+.channels a:focus-visible {
+    border-bottom-color: currentColor;
+}
+
+/* form */
+.form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem clamp(1rem, 2vw, 1.6rem);
+}
+
+.field {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.field--wide,
+.form__foot {
+    grid-column: 1 / -1;
+}
+
+.field input,
+.field textarea {
+    width: 100%;
+    font: inherit;
+    font-size: 1.05rem;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid rgba(244, 244, 244, 0.6);
+    border-radius: 0;
+    padding: 0.4rem 0;
+    resize: none;
+    transition: border-color 0.3s ease;
+}
+
+.field input:focus,
+.field textarea:focus {
+    outline: none;
+    border-bottom-color: var(--paper);
+    border-bottom-width: 2px;
+    padding-bottom: calc(0.4rem - 1px);
+}
+
+.field input:user-invalid,
+.field textarea:user-invalid {
+    border-bottom-color: #fff;
+    border-bottom-style: dashed;
+}
+
+.form__foot {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+}
+
+.send {
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    color: var(--ink);
+    background: var(--paper);
+    padding: 0.7em 1.4em;
+    border-radius: 999px;
+    transition: transform 0.4s var(--ease-out), background 0.3s ease;
+}
+
+.send:hover,
+.send:focus-visible {
+    transform: translateX(0.3em);
+    background: #fff;
+}
+
+.form-status {
+    opacity: 0.8;
+}
+
+/* =========================================================
+   7. FOOTER (wordmark echo + loop)
+   ========================================================= */
+/* Parked below the screen. script.js moves it with the scroll: pulling past the end of the
+   contact panel drags it up from the bottom, 1:1 with the finger / wheel. */
+.footer-sheet {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    overflow: hidden;
+    background: var(--ink);
+    color: var(--paper);
+    pointer-events: none;
+    will-change: transform;
+    transform: translate3d(0, 100%, 0);
+}
+/* the stack: one bright wordmark, fading outlines above and below */
+.echo {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    margin-top: -3.5em; /* 7 rows x 1em, so the bright row sits at center */
+    font-size: clamp(2.4rem, 16.5vw, 17rem);
+    line-height: 1;
+    transition: transform 0.85s cubic-bezier(0.5, 0, 0.9, 0.45);
+}
+
+.echo__row {
+    display: block;
+    height: 1em;
+    text-align: center;
+    white-space: nowrap;
+    font-family: var(--font-wordmark);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--paper);
+    opacity: var(--o, 1);
+}
+
+/* the inline-shadow look: a thin gap, then an offset copy */
+.echo__row--main {
+    color: var(--paper);
+    -webkit-text-stroke: 0;
+    text-shadow: 0.022em 0.022em 0 var(--ink), 0.04em 0.04em 0 var(--paper);
+}
+
+.footer-meta {
+    position: absolute;
+    left: 50%;
+    bottom: calc(var(--pad) * 0.6);
+    transform: translateX(-50%);
+    white-space: nowrap;
+    opacity: 0.55;
+    z-index: 1;
+}
+
+/* leaving: the stack accelerates upward, then the tiles take over */
+.footer-sheet.is-leaving .echo {
+    transform: translateY(-120vh);
+}
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 900px) {
+    .who-screen {
+        grid-template-columns: 1fr;
+        align-content: center;
+    }
+
+    .reach__cols {
+        grid-template-columns: 1fr;
+    }
+
+    .intro {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "dict"
+            "art"
+            "head"
+            "body";
+    }
+
+    .art {
+        justify-self: stretch;
+    }
+
+    .svc-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .members {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .member {
+        flex: 0 0 calc(33.33% - 1rem);
+    }
+
+    .member:nth-child(n) {
+        margin-top: 0;
+    }
+}
+
+@media (max-width: 560px) {
+    .form {
+        grid-template-columns: 1fr;
+    }
+
+    .svc {
+        min-height: 0;
+    }
+
+    .svc__title {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .svc ul {
+        font-size: 0.85rem;
+    }
+
+    .member {
+        flex: 0 0 calc(50% - 1rem);
+    }
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+    .world,
+    .stage,
+    .footer-sheet {
+        transition-duration: 0.01s !important;
+    }
+
+    .loader-icon,
+    .menu-btn:hover .menu-btn__dots i {
+        animation: none;
+    }
+
+    [data-reveal],
+    [data-sreveal] {
+        transition: none !important;
+        opacity: 1;
+        transform: none;
+    }
+
+    .scroller {
+        scroll-behavior: auto;
+    }
+
+    .ph-sweep {
+        transform: none;
+        opacity: 1;
+    }
+}
+
+
+
+
+
