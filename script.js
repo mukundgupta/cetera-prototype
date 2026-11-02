@@ -30,8 +30,11 @@
     const sheet = $("#footer"); // footer sheet, pulled up from below at the very end
     const panels = $$(".panel", world);
 
-    const loaderIcons = $("#loaderIcons");
+    const loaderEl = $("#loader");
     const columns = $$(".loader-column");
+
+    const hdr = $("#hdr");
+    const hdrRow = $("#hdrRow");
 
     const menu = $("#menu");
     const menuList = $("#menuList");
@@ -43,8 +46,9 @@
     // ------------------------------------------------------------------
     // Tuning
     // ------------------------------------------------------------------
-    const BOUNCE_MS = 1000; // dots bounce in a line before merging
-    const MERGE_MS = 1000; // merge, then columns start rising
+    const INTRO_HOLD = reduceMotion ? 0 : 900; // the stretched wordmark holds on the black screen
+    const INTRO_MS = reduceMotion ? 1 : 1500; // ...then relaxes to its normal shape as it moves up
+    const TILES_AT = reduceMotion ? 0 : 650; // the tiles start lifting this long after it starts moving
     const COL_STAGGER = 120; // delay between loader columns
     const COL_DUR = 700; // one column's slide
 
@@ -53,9 +57,14 @@
     const SNAP_W = reduceMotion ? 60 : 9.5; // settling on a stop
     const JUMP_W = reduceMotion ? 60 : 7.5; // menu jumps across several panels
 
-    const RELEASE_MS = 110; // wheel silence that counts as "let go"
-    const NEED_PANEL = 0.1; // fraction of a segment you must travel for it to commit
-    const NEED_PANEL_FLICK = 0.03; // ...when it was a flick in that direction
+    const RELEASE_MS = 80; // wheel silence that counts as "let go"
+    const NEED_PANEL = 0.04; // fraction of a segment you must travel for it to commit (touch / slow drags)
+    const NEED_PANEL_FLICK = 0.012; // ...when it was a flick in that direction
+    // Trackpad / wheel: commit the moment you have moved this far, without waiting for the
+    // scrolling to go quiet (a trackpad keeps coasting for a second after the fingers lift).
+    const EAGER_FRAC = 0.05; // of the distance to the next stop...
+    const EAGER_MIN = 34; // ...but never less than this many px
+    const EAGER_MAX = 64; // ...nor more than this many
     // The footer sheet: heavy at first, then it gives. Pulled this far (fraction of the screen
     // height) it commits on the spot and fills the screen, without waiting for you to let go.
     const SHEET_COMMIT = 0.12;
@@ -173,6 +182,154 @@
     let releaseTimer = 0;
 
     // ------------------------------------------------------------------
+    // Header: the wordmark, and the MENU / links row that rides under it
+    // ------------------------------------------------------------------
+    const WM_RATIO = 248 / 1479; // wordmark file: height / width
+    let introT = 0; // seconds since the wordmark let go of its stretch (loader)
+    let introDone = false; // true once it has settled at the top of the hero
+    let hdrP = 0; // 0 = huge across the hero, 1 = small in the middle of the header (driven by scrolling)
+    let menuP = 0; // same scale, driven by the menu: eases to 1 while the menu is open, so the wordmark steps aside
+    let hdrEff = 0; // whichever of the two is further along
+    const smooth = (t) => t * t * (3 - 2 * t);
+    const lerp = (a, b, t) => a + (b - a) * t;
+
+    // The seven letters (C E T E R A .) each get their own underdamped spring, so they wobble.
+    const WM_UNITS_W = 1479;
+    let wmState = { x: 0, y: 0, sx: 1, sy: 1, u: 1 }; // where the wordmark is on screen (set by placeHeader)
+    const letters = $$(".wm-l", wordmark).map((g) => ({
+        g,
+        cx: Number(g.dataset.cx),
+        cy: Number(g.dataset.cy),
+        x: 0, y: 0, r: 0, s: 1,
+        vx: 0, vy: 0, vr: 0, vs: 0,
+        dirty: false,
+    }));
+
+    // How lively the letters are. Turn the first five down for a calmer wordmark; raise LETTER_DAMP to
+    // make the wobble die out sooner (1 = the original springiness).
+    const LETTER_PUSH = 20; // how far the letters near the pointer are pushed away (drawing units)
+    const LETTER_LIFT = 9; // ...and lifted
+    const LETTER_TILT = 4; // ...and tilted (degrees)
+    const LETTER_SWELL = 0.045; // ...and swelled (0.045 = 4.5%)
+    const LETTER_HOP = 340; // how hard they hop one after another when the wordmark lands
+    const LETTER_DAMP = 1.45;
+
+    function hopLetters() {
+        letters.forEach((L, i) => {
+            setTimeout(() => {
+                L.vy -= LETTER_HOP;
+                L.vr += (i % 2 ? 1 : -1) * LETTER_HOP * 0.18;
+                L.vs += LETTER_HOP / 120;
+            }, i * 55);
+        });
+    }
+
+    // While the menu is open the wordmark shrinks to its header size (and grows back when it closes),
+    // so the big wordmark is not sitting on top of the menu. Only matters on the home screen: anywhere
+    // else it is already small.
+    function updateMenuScale(dt) {
+        const goal = menuOpen ? 1 : 0;
+        if (menuP === goal) return;
+        menuP = reduceMotion ? goal : menuP + (goal - menuP) * (1 - Math.exp(-dt / 0.12));
+        if (Math.abs(menuP - goal) < 0.001) menuP = goal;
+        placeHeader();
+    }
+
+    function updateLetters(dt) {
+        const calm = 1 - 0.55 * hdrEff; // quieter once the wordmark has shrunk into the header
+        const live = pointer.x !== FAR && !reduceMotion && !locked;
+        // the pointer in the wordmark own coordinates (the 1479 x 248 drawing)
+        const px = (pointer.x - wmState.x) / (wmState.sx * wmState.u);
+        const py = (pointer.y - wmState.y) / (wmState.sy * wmState.u);
+
+        const n = Math.max(1, Math.ceil(dt / (1 / 120)));
+        const h = dt / n;
+        for (const L of letters) {
+            let tx = 0, ty = 0, tr = 0, ts = 1;
+            if (live) {
+                const dx = L.cx - px;
+                const dy = L.cy - py;
+                const d = Math.hypot(dx, dy) || 1;
+                const f = Math.exp(-(d * d) / (2 * 270 * 270)) * calm; // 1 right under the pointer, fading with distance
+                tx = (dx / d) * LETTER_PUSH * f; // pushed away from the pointer
+                ty = (dy / d) * LETTER_PUSH * 0.55 * f - LETTER_LIFT * f; // ...and lifted a little
+                tr = clamp(-dx / 320, -1, 1) * LETTER_TILT * f; // leaning away
+                ts = 1 + LETTER_SWELL * f; // the nearest letter swells
+            }
+            for (let i = 0; i < n; i++) {
+                L.vx += (-9 * LETTER_DAMP * L.vx - 210 * (L.x - tx)) * h;
+                L.vy += (-9 * LETTER_DAMP * L.vy - 210 * (L.y - ty)) * h;
+                L.vr += (-10 * LETTER_DAMP * L.vr - 260 * (L.r - tr)) * h;
+                L.vs += (-12 * LETTER_DAMP * L.vs - 300 * (L.s - ts)) * h;
+                L.x += L.vx * h;
+                L.y += L.vy * h;
+                L.r += L.vr * h;
+                L.s += L.vs * h;
+            }
+            const moving =
+                Math.abs(L.vx) + Math.abs(L.vy) + Math.abs(L.vr) + Math.abs(L.vs) > 0.04 ||
+                Math.abs(L.x - tx) + Math.abs(L.y - ty) + Math.abs(L.r - tr) + Math.abs(L.s - ts) > 0.02;
+            if (moving || L.dirty) {
+                L.g.setAttribute(
+                    "transform",
+                    `translate(${L.x.toFixed(2)} ${L.y.toFixed(2)}) translate(${L.cx} ${L.cy}) rotate(${L.r.toFixed(2)}) scale(${L.s.toFixed(4)}) translate(${-L.cx} ${-L.cy})`
+                );
+                L.dirty = moving;
+            }
+        }
+    }
+
+    // Measurements are taken from the screen designs (1536px wide hero, 1440px header frame).
+    function placeHeader() {
+        // huge, across the top of the hero
+        const wBig = W * 0.9655;
+        const hBig = wBig * WM_RATIO;
+        const xBig = W * 0.0143;
+        const yBig = H * 0.0625;
+        const rowBig = yBig + hBig + H * 0.04;
+
+        // small, centred in the header
+        const wSmall = W * 0.149;
+        const k = wSmall / wBig;
+        const rowSmall = Math.max(34, W * 0.0375);
+        const ySmall = rowSmall - (wSmall * WM_RATIO) / 2;
+
+        // loader: stretched tall and centred, relaxing to its normal shape at the top
+        // The height snaps back like a spring (underdamped: it squashes past its normal shape, then
+        // rebounds and settles); the position glides up with no overshoot.
+        const stretch = clamp((H * 0.88) / hBig, 1, 6);
+        let eS = 1;
+        let eY = 1;
+        if (!introDone) {
+            const t = introT;
+            const z = 0.7; // damping ratio: < 1 means it overshoots; closer to 1 = gentler
+            const om = 10; // rad/s
+            const wd = om * Math.sqrt(1 - z * z);
+            eS = 1 - Math.exp(-z * om * t) * (Math.cos(wd * t) + ((z * om) / wd) * Math.sin(wd * t));
+            const w = 7.5;
+            eY = 1 - (1 + w * t) * Math.exp(-w * t);
+        }
+        const syIntro = lerp(stretch, 1, eS);
+        const yIntro = lerp((H - hBig * stretch) / 2, yBig, eY);
+        // squashed = a little wider (keeps it centred while it does)
+        const sxIntro = 1 + 0.12 * Math.max(0, 1 - syIntro);
+        const xIntro = xBig - ((sxIntro - 1) * wBig) / 2;
+
+        // scroll (or the menu): big -> small
+        hdrEff = Math.max(hdrP, menuP);
+        const e = smooth(hdrEff);
+        const sx = lerp(sxIntro, k, e);
+        const sy = lerp(syIntro, k, e);
+        const x = lerp(xIntro, (W - wSmall) / 2, e);
+        const y = lerp(yIntro, ySmall, e);
+
+        wmState = { x, y, sx, sy, u: wBig / WM_UNITS_W };
+        wordmark.style.width = `${wBig}px`;
+        wordmark.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${sx}, ${sy})`;
+        hdrRow.style.top = `${lerp(rowBig, rowSmall, e)}px`;
+    }
+
+    // ------------------------------------------------------------------
     // Painting
     // ------------------------------------------------------------------
     function paint() {
@@ -184,6 +341,10 @@
         // 0 on the philosophy title card, 1 once the camera has reached 01: sweeps the big title away
         stage.style.setProperty("--ph", clamp(c.sy / H, 0, 1).toFixed(3));
         sheet.style.transform = `translate3d(0, ${H - c.sheet}px, 0)`;
+
+        // the wordmark shrinks into the header over the first 65% of the move off the hero
+        hdrP = clamp(pos / (H * 0.65), 0, 1);
+        placeHeader();
     }
 
     function applyScope() {
@@ -194,6 +355,8 @@
 
     function updateUI() {
         const cur = steps[anchor];
+        // over the (black) menu the header is always cream, even on a light panel
+        hdr.dataset.header = menuOpen ? "cream" : cur.panel.dataset.header || "cream";
         // the title card is sub 0; the three minimap dots are philosophies 01, 02, 03
         minimapNodes.forEach((node, n) => node.classList.toggle("is-on", cur.sub === n + 1));
         $$("button", menuList).forEach((btn) => {
@@ -309,7 +472,7 @@
     }
 
     // Input arrived (px, positive = forward): the camera follows it 1:1 within one segment.
-    function feed(d) {
+    function feed(d, eager = false) {
         if (locked) return;
         const lo = cum[Math.max(anchor - 1, 0)];
         const hi = anchor === last ? cum[last] + H : cum[anchor + 1];
@@ -326,6 +489,22 @@
         target = clamp(target + move, lo, hi);
         omega = FOLLOW_W;
         sheetPending = false;
+
+        // far enough already: go to the next stop now (the footer sheet has its own rule above)
+        if (eager && !(anchor === last && target > cum[last] + 0.5)) {
+            const away = target - cum[anchor];
+            const dirN = Math.sign(away);
+            const nextI = anchor + dirN;
+            if (dirN && nextI >= 0 && nextI <= last) {
+                const seg = Math.abs(cum[nextI] - cum[anchor]);
+                if (Math.abs(away) >= clamp(EAGER_FRAC * seg, EAGER_MIN, EAGER_MAX)) {
+                    swallowUntilQuiet = true; // the coasting tail of this swipe must not trigger another move
+                    clearTimeout(releaseTimer);
+                    goStep(dirN);
+                    return;
+                }
+            }
+        }
 
         // far enough: it commits on the spot and fills the screen
         if (anchor === last && target - cum[last] >= SHEET_COMMIT * H) {
@@ -408,7 +587,7 @@
             col.style.transition = "none";
             col.style.transform = "translateY(100%)";
         });
-        void loaderIcons.offsetWidth;
+        void loaderEl.offsetWidth;
         columns.forEach((col, i) => {
             col.style.transition = "";
             setTimeout(() => {
@@ -418,15 +597,42 @@
         await wait((columns.length - 1) * COL_STAGGER + COL_DUR);
     }
 
-    async function runLoader() {
-        await wait(BOUNCE_MS);
-        loaderIcons.classList.add("is-merging");
-        await wait(MERGE_MS);
-        loaderIcons.classList.add("is-hidden");
+    // Plays once, on load: the wordmark starts stretched tall on a black screen, relaxes to its
+    // normal shape while moving up to the top of the hero, and the black tiles lift off behind it.
+    const tween = (ms, fn) =>
+        new Promise((resolve) => {
+            const t0 = performance.now();
+            (function tick(now) {
+                const t = clamp((now - t0) / ms, 0, 1);
+                fn(t);
+                if (t < 1) requestAnimationFrame(tick);
+                else resolve();
+            })(t0);
+        });
 
-        armed = true; // hero text starts as the columns lift
+    async function runLoader() {
+        await wait(INTRO_HOLD);
+
+        const relax = tween(INTRO_MS, (t) => {
+            introT = t * (INTRO_MS / 1000);
+            placeHeader();
+        }).then(() => {
+            introDone = true;
+            placeHeader();
+        });
+        // the letters hop one after another as it lands
+        setTimeout(hopLetters, reduceMotion ? 0 : 480);
+
+        // once the wordmark is well on its way, the tiles lift off the hero
+        await wait(TILES_AT);
+        armed = true; // the hero text starts as the tiles lift
         applyScope();
-        await revealColumns();
+        const lift = revealColumns();
+
+        await relax;
+        hdr.classList.remove("is-intro"); // MENU and the links fade in
+        await lift;
+        hdr.classList.remove("is-above"); // back below the tiles, which the footer loop covers it with
     }
 
     // The footer is committed: the sheet fills the screen, the CETERA stack starts rising the
@@ -489,6 +695,7 @@
 
     function toggleMenu(open, restoreFocus = true) {
         menuOpen = open;
+        updateUI();
         menu.classList.toggle("is-open", open);
         menu.inert = !open;
         menuBtn.setAttribute("aria-expanded", String(open));
@@ -515,6 +722,30 @@
         goTo(0);
     });
 
+    // header links: about, work (the services panel for now), contact
+    $$("[data-go]").forEach((a) => {
+        a.addEventListener("click", (e) => {
+            e.preventDefault();
+            const panel = panels.find((p) => p.dataset.label === a.dataset.go);
+            if (!panel) return;
+            if (menuOpen) toggleMenu(false, false);
+            goTo(steps.findIndex((s) => s.panel === panel));
+        });
+    });
+
+    // The team strip grows from its inset size to the full screen as you scroll through
+    // .team-expand (a tall block whose stage sticks to the screen). CSS reads --x (0 -> 1).
+    const aboutScroller = $("#aboutScroller");
+    const teamExpand = $("#teamExpand");
+    function updateTeam() {
+        if (!aboutScroller || !teamExpand) return;
+        const range = teamExpand.offsetHeight - aboutScroller.clientHeight;
+        const x = range > 0 ? clamp((aboutScroller.scrollTop - teamExpand.offsetTop) / range, 0, 1) : 0;
+        teamExpand.style.setProperty("--x", x.toFixed(4));
+    }
+    if (aboutScroller) aboutScroller.addEventListener("scroll", updateTeam, { passive: true });
+    window.addEventListener("resize", updateTeam);
+
     // ------------------------------------------------------------------
     // Input: wheel / trackpad, touch, keys
     // ------------------------------------------------------------------
@@ -522,6 +753,7 @@
     const atRest = () => Math.abs(target - cum[anchor]) < 0.5;
 
     let lastWheelAt = 0;
+    let swallowUntilQuiet = false; // after an eager move, ignore the rest of that swipe
     let lastNotchAt = 0;
 
     window.addEventListener(
@@ -534,6 +766,15 @@
             if (menuOpen || locked) {
                 e.preventDefault();
                 return;
+            }
+
+            // the tail of a swipe that has already moved the page: swallow it until things go quiet
+            if (swallowUntilQuiet) {
+                if (gap > 140) swallowUntilQuiet = false;
+                else {
+                    e.preventDefault();
+                    return;
+                }
             }
 
             let d = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
@@ -578,9 +819,9 @@
                 return;
             }
 
-            // 3) trackpad: follow it 1:1, settle when it stops
+            // 3) trackpad: follow it 1:1; moves on as soon as you have gone far enough, or when it stops
             noteMove(d);
-            feed(d);
+            feed(d, true);
             scheduleRelease();
         },
         { passive: false }
@@ -732,7 +973,7 @@
     }
 
     // ------------------------------------------------------------------
-    // Pointer (shared by faces and dot grids)
+    // Pointer (used by the dot grids)
     // ------------------------------------------------------------------
     const FAR = -9999;
     const pointer = { x: FAR, y: FAR, lastMove: 0 };
@@ -756,6 +997,68 @@
     document.addEventListener("mouseleave", () => {
         pointer.x = pointer.y = FAR;
     });
+
+    // ------------------------------------------------------------------
+    // Cursor: a dot, and a smaller dot trailing it. Over anything interactive the dot grows into a
+    // disc. Both are blended with the page (see .cursor in styles.css), which is what flips the
+    // colours of whatever is underneath.
+    // ------------------------------------------------------------------
+    const cursorDot = $("#cursorDot");
+    const cursorTrail = $("#cursorTrail");
+    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    const INTERACTIVE = `a, button, [role="button"], summary, select, [data-cursor]`;
+    const TEXTFIELD = "input, textarea";
+    const trail = { x: 0, y: 0, ready: false };
+    let cursorState = "";
+    let cursorFrame = 0;
+
+    if (finePointer && cursorDot && cursorTrail) {
+        document.documentElement.classList.add("has-cursor");
+        window.addEventListener("pointerdown", () => cursorDot.classList.add("is-down"), { passive: true });
+        window.addEventListener("pointerup", () => cursorDot.classList.remove("is-down"), { passive: true });
+        document.documentElement.addEventListener("mouseleave", () => {
+            pointer.x = pointer.y = FAR;
+        });
+    }
+
+    function updateCursor(dt) {
+        if (!finePointer || !cursorDot) return;
+        const hidden = pointer.x === FAR;
+        cursorDot.classList.toggle("is-on", !hidden);
+        cursorTrail.classList.toggle("is-on", !hidden);
+        if (hidden) {
+            trail.ready = false;
+            return;
+        }
+        if (!trail.ready) {
+            trail.x = pointer.x;
+            trail.y = pointer.y;
+            trail.ready = true;
+        }
+
+        // the small dot eases toward the pointer (frame-rate independent)
+        const k = reduceMotion ? 1 : 1 - Math.exp(-dt / 0.085);
+        trail.x += (pointer.x - trail.x) * k;
+        trail.y += (pointer.y - trail.y) * k;
+        cursorDot.style.transform = `translate3d(${pointer.x}px, ${pointer.y}px, 0)`;
+        cursorTrail.style.transform = `translate3d(${trail.x.toFixed(2)}px, ${trail.y.toFixed(2)}px, 0)`;
+
+        // what is under the pointer? (re-checked every few frames, since the page also moves under a still pointer)
+        if (++cursorFrame % 3 === 0) {
+            const el = document.elementFromPoint(pointer.x, pointer.y);
+            let state = "";
+            if (el) {
+                const hit = el.closest(INTERACTIVE);
+                if (el.closest(TEXTFIELD)) state = "text";
+                else if (hit && !hit.disabled && !hit.closest("[inert]")) state = "hover";
+            }
+            if (state !== cursorState) {
+                cursorState = state;
+                cursorDot.classList.toggle("is-hover", state === "hover");
+                cursorDot.classList.toggle("is-text", state === "text");
+            }
+        }
+    }
 
     // ------------------------------------------------------------------
     // Dot grid: dots push away from the cursor and spring back
@@ -845,60 +1148,6 @@
     const grids = $$(".dot-grid").map((canvas) => createDotGrid(canvas));
 
     // ------------------------------------------------------------------
-    // Faces: three dots with eyes that follow the cursor
-    // ------------------------------------------------------------------
-    const faces = $$(".face");
-    const moods = ["smug", "sleepy", "wide", "squint"];
-    const idle = { x: 0, y: 0, next: 0 };
-
-    faces.forEach((face) => {
-        face.addEventListener("click", () => {
-            const n = moods.indexOf(face.dataset.mood);
-            face.dataset.mood = moods[(n + 1) % moods.length];
-        });
-
-        const blink = () => {
-            face.classList.add("is-blink");
-            setTimeout(() => face.classList.remove("is-blink"), 130);
-            setTimeout(blink, 2500 + Math.random() * 3500);
-        };
-        if (!reduceMotion) setTimeout(blink, 1500 + Math.random() * 3000);
-    });
-
-    function updateFaces(t) {
-        if (reduceMotion) return;
-
-        let tx = pointer.x;
-        let ty = pointer.y;
-        // when nobody is moving the mouse, the dots look around on their own
-        if (pointer.x === FAR || t - pointer.lastMove > 2500) {
-            if (t > idle.next) {
-                idle.x = Math.random() * innerWidth;
-                idle.y = Math.random() * innerHeight;
-                idle.next = t + 1200 + Math.random() * 1800;
-            }
-            tx = idle.x;
-            ty = idle.y;
-        }
-
-        faces.forEach((face) => {
-            const fr = face.getBoundingClientRect();
-            if (fr.bottom < 0 || fr.top > innerHeight || fr.right < 0 || fr.left > innerWidth) return;
-
-            $$(".eye", face).forEach((eye) => {
-                const r = eye.getBoundingClientRect();
-                const dx = tx - (r.left + r.width / 2);
-                const dy = ty - (r.top + r.height / 2);
-                const angle = Math.atan2(dy, dx);
-                const reach = Math.min(1, Math.hypot(dx, dy) / (Math.min(innerWidth, innerHeight) * 0.5));
-                const pupil = eye.firstElementChild;
-                pupil.style.setProperty("--px", `${Math.cos(angle) * r.width * 0.2 * reach}px`);
-                pupil.style.setProperty("--py", `${Math.sin(angle) * r.height * 0.2 * reach}px`);
-            });
-        });
-    }
-
-    // ------------------------------------------------------------------
     // Philosophy 02: draw the line joining the two words
     // ------------------------------------------------------------------
     function drawConnect() {
@@ -932,7 +1181,9 @@
         const dt = Math.min((t - (lastFrame || t)) / 1000, 0.05);
         lastFrame = t;
         stepCamera(dt);
-        updateFaces(t);
+        updateMenuScale(dt);
+        updateLetters(dt);
+        updateCursor(dt);
         grids.forEach((g) => g.update());
         requestAnimationFrame(frame);
     }
@@ -956,3 +1207,7 @@
         wordmark.disabled = false;
     });
 })();
+
+
+
+

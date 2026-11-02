@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CETERA</title>
+    <title>CETERA.</title>
     <meta
         name="description"
-        content="CETERA is a design studio that looks beyond the obvious, explores the unfinished, and finds possibilities in the unexpected."
+        content="A Mumbai based design studio built to take your idea and see it all the way through."
     />
 
-    <!-- Placeholder typefaces (swap once the studio picks its own). -->
+    <!-- Fonts: Barrio (nav + quirky lines), Staatliches (headlines + captions), Lexend (paragraph).
+         The last four are still used by the sections that have not been redesigned yet. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-        href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=DM+Mono:wght@400;500&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Barrio&family=Staatliches&family=Lexend:wght@300..500&family=Alfa+Slab+One&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=DM+Mono:wght@400;500&display=swap"
         rel="stylesheet"
     />
 
@@ -21,8 +22,9 @@
 </head>
 <body>
     <!-- =====================================================
-         LOADER: three dots bounce in a line, merge, then white
-         columns slide up to reveal the site (also reused for the loop).
+         LOADER: black tiles. The wordmark (in the header layer below) starts stretched tall in
+         the middle of this screen, relaxes to its normal shape as it moves up to the hero, and
+         the tiles lift off. The same tiles are reused by the footer loop.
          ===================================================== -->
     <div class="loader" id="loader" aria-hidden="true">
         <div class="loader-columns" id="loaderColumns">
@@ -35,164 +37,141 @@
             <span class="loader-column"></span>
             <span class="loader-column"></span>
         </div>
-
-        <div class="loader-icons" id="loaderIcons">
-            <span class="loader-dot">
-                <img class="loader-icon" src="assets/loadericon1.svg" alt="" />
-            </span>
-            <span class="loader-dot">
-                <img class="loader-icon" src="assets/loadericon2.svg" alt="" />
-            </span>
-            <span class="loader-dot">
-                <img class="loader-icon" src="assets/loadericon3.svg" alt="" />
-            </span>
-            <img class="loader-merged" src="assets/loadericon2.svg" alt="" />
-        </div>
     </div>
 
     <!-- =====================================================
-         CHROME: wordmark, step label, three-dot menu
+         HEADER (fixed): the CETERA. wordmark + MENU + page links.
+         script.js places everything: the wordmark is huge across the top of the hero, and
+         shrinks into the centre of the header as the page scrolls on.
          ===================================================== -->
-    <header class="chrome">
-        <button class="wordmark" id="wordmark" type="button">CETERA</button>
+    <header class="hdr is-above is-intro" id="hdr" data-header="cream">
+        <div class="hdr__row" id="hdrRow">
+            <button class="hdr__menu" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu">
+                <span id="menuLabel">menu</span>
+            </button>
 
-        <button
-            class="menu-btn"
-            id="menuBtn"
-            type="button"
-            aria-expanded="false"
-            aria-controls="menu"
-        >
-            <span class="menu-btn__label" id="menuLabel">menu</span>
-            <span class="menu-btn__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <nav class="hdr__nav" aria-label="Primary">
+                <a href="#about" data-go="about">about</a>
+                <!-- TODO: no work section yet; points at services until the work page exists -->
+                <a href="#work" data-go="services">work</a>
+                <a href="#contact" data-go="contact">contact</a>
+            </nav>
+        </div>
+
+        <button class="hdr__wm" id="wordmark" type="button" aria-label="CETERA, back to the top">
+            <!-- 7 letters (C E T E R A .), each a <g class="wm-l"> that script.js springs around -->
+            <svg class="wm-svg" viewBox="0 0 1479 248" fill="none" aria-hidden="true" focusable="false">
+<defs>
+<path id="stroke0_989_3397" d="M746.262 125.442L748.657 119.082H820.926L818.93 125.442H746.262ZM787.387 119.082C795.905 119.082 802.959 117.81 808.548 115.267C814.138 112.511 818.796 109.013 822.523 104.773C826.516 100.534 829.843 96.0821 832.505 91.4185C835.167 86.7549 837.562 82.4093 839.692 78.3816H848.875C844.084 89.6166 840.756 98.414 838.893 104.773C837.03 110.921 835.167 116.75 833.303 122.262C831.972 125.866 830.775 129.575 829.71 133.391C828.645 137.207 827.314 141.658 825.717 146.746C824.386 151.833 822.789 158.299 820.926 166.142H811.743C812.275 161.267 812.674 156.497 812.94 151.833C813.473 146.958 813.073 142.612 811.743 138.796C810.412 134.769 807.617 131.589 803.358 129.257C799.365 126.714 793.11 125.442 784.592 125.442L787.387 119.082ZM893.594 67.5706C895.723 55.0636 896.256 45.2065 895.191 37.9992C894.126 30.5798 890.4 25.3862 884.011 22.4185C877.889 19.2388 868.04 17.6489 854.465 17.6489H830.908C822.124 17.6489 815.203 18.2849 810.145 19.5568C805.354 20.6167 801.495 23.0545 798.566 26.8701C795.638 30.4738 792.844 36.1973 790.182 44.0406L737.078 201.755C734.416 209.386 733.219 215.11 733.485 218.925C734.017 222.741 736.413 225.285 740.672 226.557C744.931 227.617 751.585 228.146 760.635 228.146H784.991C800.962 228.146 813.872 226.345 823.721 222.741C833.57 219.137 841.954 213.308 848.875 205.252C856.062 196.985 862.983 185.856 869.637 171.866H878.821C877.49 174.621 876.026 178.013 874.429 182.041C872.832 186.068 871.368 190.308 870.037 194.759C868.706 198.787 866.976 204.617 864.846 212.248C862.717 219.667 860.986 227.405 859.655 235.46C846.08 235.036 830.775 234.824 813.739 234.824C796.703 234.612 781.531 234.506 768.222 234.506C762.099 234.506 754.247 234.506 744.664 234.506C735.348 234.506 725.1 234.612 713.92 234.824C702.741 234.824 691.428 234.93 679.982 235.142C668.802 235.142 658.155 235.248 648.04 235.46L650.036 229.1C659.087 228.676 666.14 227.829 671.198 226.557C676.255 225.285 680.115 222.741 682.777 218.925C685.705 215.11 688.5 209.386 691.162 201.755L744.265 44.0406C746.927 36.1973 747.992 30.4738 747.459 26.8701C747.193 23.0545 744.931 20.5107 740.672 19.2388C736.679 17.7549 730.157 16.907 721.107 16.695L723.104 10.3356C733.219 10.5476 743.866 10.7595 755.046 10.9715C766.491 10.9715 777.804 11.0775 788.984 11.2895C800.164 11.2895 810.412 11.2895 819.728 11.2895C829.311 11.2895 837.163 11.2895 843.285 11.2895C855.263 11.2895 868.573 11.2895 883.213 11.2895C898.119 11.0775 911.561 10.7595 923.539 10.3356C920.079 17.7549 917.018 24.8563 914.356 31.6397C911.694 38.2112 909.698 43.6167 908.367 47.8563C907.036 51.672 905.838 55.3816 904.773 58.9853C903.975 62.377 903.309 65.2388 902.777 67.5706H893.594Z"></path>
+<path id="stroke1_989_3397" d="M996.787 122.898C1007.79 123.322 1016.51 123.852 1022.97 124.488C1029.42 124.912 1034.68 125.336 1038.75 125.76C1043.05 125.972 1047.12 126.396 1050.94 127.032C1059.07 128.091 1066.24 129.469 1072.46 131.165C1078.92 132.861 1084.18 135.299 1088.24 138.479C1092.54 141.658 1095.65 145.792 1097.57 150.879C1099.48 155.755 1100.08 162.008 1099.36 169.64L1095.77 202.073C1095.06 208.644 1095.41 214.474 1096.85 219.561C1098.28 224.649 1101.63 227.087 1106.89 226.875C1111.43 226.663 1115.38 224.437 1118.73 220.197C1122.07 215.746 1125.3 209.492 1128.41 201.437L1130.2 196.985H1138.45L1137.02 201.119C1132.95 214.05 1127.21 223.801 1119.8 230.372C1112.63 236.732 1102.83 239.911 1090.39 239.911C1077 239.911 1067.32 236.732 1061.34 230.372C1055.6 223.801 1053.21 216.064 1054.17 207.16L1058.11 171.548C1059.07 161.161 1058.23 152.787 1055.6 146.428C1053.21 140.068 1047.48 135.511 1038.39 132.755C1029.3 129.787 1015.2 128.303 996.069 128.303L996.787 122.898ZM992.483 128.303L994.276 121.944H1008.98C1024.28 121.944 1037.43 120.354 1048.43 117.174C1059.67 113.783 1068.75 108.907 1075.69 102.548C1082.86 96.1882 1088.12 88.7687 1091.47 80.2894C1095.06 71.8102 1096.85 62.483 1096.85 52.3079C1096.85 40.225 1093.5 31.3217 1086.81 25.5982C1080.35 19.6627 1069.83 16.695 1055.25 16.695C1045.92 16.695 1039.23 18.3909 1035.16 21.7826C1031.34 25.1743 1027.87 31.8517 1024.76 41.8148L976.703 201.755C974.79 208.326 973.714 213.626 973.475 217.653C973.236 221.469 974.909 224.331 978.496 226.239C982.321 227.935 988.777 228.888 997.863 229.1L996.428 235.46C990.451 235.036 983.158 234.824 974.551 234.824C966.182 234.612 957.336 234.506 948.011 234.506C937.969 234.506 928.405 234.612 919.32 234.824C910.234 234.824 902.942 235.036 897.442 235.46L898.877 229.1C907.006 228.676 913.342 227.829 917.885 226.557C922.428 225.285 926.014 222.741 928.644 218.925C931.274 215.11 933.665 209.386 935.817 201.755L959.488 122.898L983.158 44.0406C985.31 37.2572 986.267 31.9577 986.027 28.142C986.027 24.3263 984.234 21.4646 980.648 19.5568C977.061 17.6489 970.845 16.695 961.998 16.695L963.792 10.3356C967.378 10.5476 971.801 10.7595 977.061 10.9715C982.321 10.9715 987.94 11.0775 993.918 11.2895C1000.13 11.2895 1005.87 11.2895 1011.13 11.2895C1020.7 11.2895 1029.78 11.1835 1038.39 10.9715C1047 10.7595 1055.6 10.6535 1064.21 10.6535C1090.03 10.6535 1109.16 14.5752 1121.59 22.4185C1134.03 30.2618 1140.24 41.1788 1140.24 55.1696C1140.24 69.5844 1134.63 82.1973 1123.39 93.0083C1112.15 103.819 1096.49 112.405 1076.41 118.764C1056.32 124.912 1033.13 127.985 1006.83 127.985L992.483 128.303Z"></path>
+<path id="stroke2_989_3397" d="M1213.33 185.165C1204.96 195.552 1200.18 203.925 1198.99 210.284C1197.79 216.432 1199.58 220.99 1204.37 223.957C1209.15 226.713 1216.44 228.197 1226.24 228.409L1224.45 234.768C1216.56 234.344 1209.03 234.132 1201.86 234.132C1194.68 233.92 1187.87 233.814 1181.41 233.814C1175.67 233.814 1170.89 233.92 1167.07 234.132C1163 234.132 1159.06 234.344 1155.23 234.768L1157.03 228.409C1160.61 227.561 1164.32 226.077 1168.14 223.957C1171.73 221.837 1175.79 218.764 1180.34 214.736C1184.64 210.708 1189.3 205.409 1194.32 198.837L1347.47 8.05408C1349.14 8.05408 1350.69 8.05408 1352.13 8.05408C1353.8 8.05408 1355.47 8.05408 1357.15 8.05408L1371.49 208.059C1372.21 215.69 1374.36 220.99 1377.95 223.957C1381.78 226.713 1385.48 228.197 1389.07 228.409L1387.63 234.768C1382.37 234.344 1375.68 234.132 1367.55 234.132C1359.42 233.92 1351.65 233.814 1344.24 233.814C1334.91 233.814 1326.07 233.92 1317.7 234.132C1309.33 234.132 1302.63 234.344 1297.61 234.768L1299.05 228.409C1310.52 227.985 1318.65 226.183 1323.44 223.003C1328.22 219.612 1330.37 212.51 1329.89 201.699L1320.57 48.1186L1326.3 43.985L1213.33 185.165ZM1143.12 145.59L1348.54 143.192L1345.67 149.552L1136.67 151.949L1143.12 145.59Z"></path>
+<path id="stroke4_989_3397" d="M196.24 218.569C177.292 233.936 153.061 241.62 123.547 241.62C87.0285 241.62 58.3189 231.239 37.4183 210.478C16.5177 189.614 6.06738 161.016 6.06738 124.683C6.06738 85.3989 17.9532 55.1215 41.7247 33.851C62.3956 15.3283 88.6937 6.06702 120.619 6.06702C163.339 6.06702 194.575 18.4833 214.327 43.3159C225.237 57.2587 231.093 71.2525 231.897 85.2971H178.842C175.397 74.5092 170.975 66.3674 165.578 60.8717C155.932 51.1015 141.634 46.2164 122.686 46.2164C103.393 46.2164 88.1769 53.1369 77.0375 66.978C65.8982 80.7174 60.3286 100.207 60.3286 125.447C60.3286 150.686 66.1853 169.616 77.8988 182.236C89.7272 194.754 104.714 201.013 122.858 201.013C141.462 201.013 155.644 195.619 165.406 184.831C170.803 179.03 175.282 170.328 178.842 158.726H231.38C226.787 183.253 215.073 203.201 196.24 218.569Z"></path>
+<path id="stroke6_989_3397" d="M1478.07 216.499C1478.07 229.477 1464.86 239.999 1448.57 239.999C1432.27 239.999 1419.07 229.477 1419.07 216.499C1419.07 203.52 1432.27 192.999 1448.57 192.999C1464.86 192.999 1478.07 203.52 1478.07 216.499Z"></path>
+</defs>
+<g class="wm-l" data-cx="119" data-cy="124"><use href="#stroke4_989_3397" fill="currentColor"/><path d="M196.24 218.569C177.292 233.936 153.061 241.62 123.547 241.62C87.0285 241.62 58.3189 231.239 37.4183 210.478C16.5177 189.614 6.06738 161.016 6.06738 124.683C6.06738 85.3989 17.9532 55.1215 41.7247 33.851C62.3956 15.3283 88.6937 6.06702 120.619 6.06702C163.339 6.06702 194.575 18.4833 214.327 43.3159C225.237 57.2587 231.093 71.2525 231.897 85.2971H178.842C175.397 74.5092 170.975 66.3674 165.578 60.8717C155.932 51.1015 141.634 46.2164 122.686 46.2164C103.393 46.2164 88.1769 53.1369 77.0375 66.978C65.8982 80.7174 60.3286 100.207 60.3286 125.447C60.3286 150.686 66.1853 169.616 77.8988 182.236C89.7272 194.754 104.714 201.013 122.858 201.013C141.462 201.013 155.644 195.619 165.406 184.831C170.803 179.03 175.282 170.328 178.842 158.726H231.38C226.787 183.253 215.073 203.201 196.24 218.569Z" stroke-width="12.134" stroke-linejoin="round" stroke="currentColor"/></g>
+<g class="wm-l" data-cx="370" data-cy="123"><path d="M448.77 137.049H375.874V194.906H465.995V235.361H273.584V10.3415H459.794V50.1855H375.874V97.9678H448.77V137.049Z" fill="currentColor"/><path d="M448.77 137.049H375.874V194.906H465.995V235.361H273.584V10.3415H459.794V50.1855H375.874V97.9678H448.77V137.049Z" stroke-width="12.134" stroke-linejoin="round" stroke="currentColor"/></g>
+<g class="wm-l" data-cx="588" data-cy="123"><path d="M689.549 10.3415V50.1855H615.86V235.361H562.46V50.1855H486.15V10.3415H689.549Z" fill="currentColor"/><path d="M689.549 10.3415V50.1855H615.86V235.361H562.46V50.1855H486.15V10.3415H689.549Z" stroke-width="12.134" stroke-linejoin="round" stroke="currentColor"/></g>
+<g class="wm-l" data-cx="786" data-cy="123"><use href="#stroke0_989_3397" fill="currentColor"/><path d="M746.262 125.442L748.657 119.082H820.926L818.929 125.442H746.262ZM787.387 119.082C795.905 119.082 802.959 117.81 808.548 115.266C814.138 112.511 818.796 109.013 822.523 104.773C826.516 100.534 829.843 96.0821 832.505 91.4185C835.167 86.7549 837.562 82.4093 839.692 78.3816H848.875C844.084 89.6166 840.756 98.414 838.893 104.773C837.03 110.921 835.167 116.75 833.303 122.262C831.972 125.866 830.775 129.575 829.71 133.391C828.645 137.207 827.314 141.658 825.717 146.746C824.386 151.833 822.789 158.299 820.926 166.142H811.743C812.275 161.267 812.674 156.497 812.94 151.833C813.473 146.958 813.073 142.612 811.743 138.796C810.412 134.769 807.617 131.589 803.358 129.257C799.365 126.714 793.11 125.442 784.592 125.442L787.387 119.082ZM893.594 67.5706C895.723 55.0636 896.256 45.2065 895.191 37.9992C894.126 30.5798 890.4 25.3862 884.011 22.4185C877.889 19.2388 868.04 17.6489 854.465 17.6489H830.908C822.124 17.6489 815.203 18.2849 810.145 19.5568C805.354 20.6167 801.495 23.0545 798.567 26.8701C795.638 30.4738 792.844 36.1973 790.182 44.0406L737.078 201.755C734.416 209.386 733.219 215.11 733.485 218.925C734.017 222.741 736.413 225.285 740.672 226.557C744.931 227.617 751.585 228.146 760.635 228.146H784.991C800.962 228.146 813.872 226.345 823.721 222.741C833.57 219.137 841.954 213.308 848.875 205.252C856.062 196.985 862.983 185.856 869.637 171.866H878.821C877.49 174.621 876.026 178.013 874.429 182.041C872.832 186.068 871.368 190.308 870.037 194.759C868.706 198.787 866.976 204.617 864.846 212.248C862.717 219.667 860.986 227.405 859.655 235.46C846.08 235.036 830.775 234.824 813.739 234.824C796.703 234.612 781.531 234.506 768.222 234.506C762.099 234.506 754.247 234.506 744.664 234.506C735.348 234.506 725.1 234.612 713.92 234.824C702.741 234.824 691.428 234.93 679.982 235.142C668.802 235.142 658.155 235.248 648.04 235.46L650.036 229.1C659.087 228.676 666.14 227.829 671.198 226.557C676.255 225.285 680.115 222.741 682.777 218.925C685.705 215.11 688.5 209.386 691.162 201.755L744.265 44.0406C746.927 36.1973 747.992 30.4738 747.459 26.8701C747.193 23.0545 744.931 20.5107 740.672 19.2388C736.679 17.7549 730.157 16.907 721.107 16.695L723.104 10.3356C733.219 10.5476 743.866 10.7595 755.046 10.9715C766.491 10.9715 777.804 11.0775 788.984 11.2895C800.164 11.2895 810.412 11.2895 819.728 11.2895C829.311 11.2895 837.163 11.2895 843.285 11.2895C855.263 11.2895 868.573 11.2895 883.213 11.2895C898.119 11.0775 911.561 10.7595 923.539 10.3356C920.079 17.7549 917.018 24.8563 914.356 31.6397C911.694 38.2112 909.698 43.6167 908.367 47.8563C907.036 51.672 905.838 55.3816 904.773 58.9853C903.975 62.377 903.309 65.2388 902.777 67.5706H893.594Z" stroke-width="12.134" stroke-linejoin="round" stroke="currentColor"/></g>
+<g class="wm-l" data-cx="1019" data-cy="125"><use href="#stroke1_989_3397" fill="currentColor"/><path d="M996.787 122.898C1007.79 123.322 1016.51 123.852 1022.97 124.488C1029.42 124.912 1034.68 125.336 1038.75 125.76C1043.05 125.972 1047.12 126.396 1050.94 127.031C1059.07 128.091 1066.24 129.469 1072.46 131.165C1078.92 132.861 1084.18 135.299 1088.24 138.479C1092.54 141.658 1095.65 145.792 1097.57 150.879C1099.48 155.755 1100.08 162.008 1099.36 169.64L1095.77 202.073C1095.06 208.644 1095.41 214.474 1096.85 219.561C1098.28 224.649 1101.63 227.087 1106.89 226.875C1111.43 226.663 1115.38 224.437 1118.73 220.197C1122.07 215.746 1125.3 209.492 1128.41 201.437L1130.2 196.985H1138.45L1137.02 201.119C1132.95 214.05 1127.21 223.801 1119.8 230.372C1112.63 236.732 1102.83 239.911 1090.39 239.911C1077 239.911 1067.32 236.732 1061.34 230.372C1055.6 223.801 1053.21 216.064 1054.17 207.16L1058.11 171.548C1059.07 161.161 1058.23 152.787 1055.6 146.428C1053.21 140.068 1047.48 135.511 1038.39 132.755C1029.3 129.787 1015.2 128.303 996.069 128.303L996.787 122.898ZM992.483 128.303L994.276 121.944H1008.98C1024.28 121.944 1037.43 120.354 1048.43 117.174C1059.67 113.783 1068.75 108.907 1075.69 102.548C1082.86 96.1882 1088.12 88.7687 1091.47 80.2894C1095.06 71.8102 1096.85 62.483 1096.85 52.3079C1096.85 40.225 1093.5 31.3217 1086.81 25.5982C1080.35 19.6627 1069.83 16.695 1055.25 16.695C1045.92 16.695 1039.23 18.3909 1035.16 21.7826C1031.34 25.1743 1027.87 31.8517 1024.76 41.8148L976.703 201.755C974.79 208.326 973.714 213.626 973.475 217.653C973.236 221.469 974.909 224.331 978.496 226.239C982.321 227.935 988.777 228.888 997.863 229.1L996.428 235.46C990.451 235.036 983.158 234.824 974.551 234.824C966.182 234.612 957.336 234.506 948.011 234.506C937.969 234.506 928.405 234.612 919.32 234.824C910.234 234.824 902.942 235.036 897.442 235.46L898.877 229.1C907.006 228.676 913.342 227.829 917.885 226.557C922.428 225.285 926.014 222.741 928.644 218.925C931.274 215.11 933.665 209.386 935.817 201.755L959.488 122.898L983.158 44.0406C985.31 37.2572 986.266 31.9577 986.027 28.142C986.027 24.3263 984.234 21.4646 980.648 19.5568C977.061 17.6489 970.845 16.695 961.998 16.695L963.792 10.3356C967.378 10.5476 971.801 10.7595 977.061 10.9715C982.321 10.9715 987.94 11.0775 993.918 11.2895C1000.13 11.2895 1005.87 11.2895 1011.13 11.2895C1020.7 11.2895 1029.78 11.1835 1038.39 10.9715C1047 10.7595 1055.6 10.6535 1064.21 10.6535C1090.03 10.6535 1109.16 14.5752 1121.59 22.4185C1134.03 30.2618 1140.24 41.1788 1140.24 55.1696C1140.24 69.5844 1134.63 82.1973 1123.39 93.0083C1112.15 103.819 1096.49 112.405 1076.41 118.764C1056.32 124.912 1033.13 127.985 1006.83 127.985L992.483 128.303Z" stroke-width="12.134" stroke-linejoin="round" stroke="currentColor"/></g>
+<g class="wm-l" data-cx="1263" data-cy="121"><use href="#stroke2_989_3397" fill="currentColor"/><path d="M1213.33 185.165C1204.96 195.552 1200.18 203.925 1198.99 210.284C1197.79 216.432 1199.58 220.99 1204.37 223.957C1209.15 226.713 1216.44 228.197 1226.24 228.409L1224.45 234.768C1216.56 234.344 1209.03 234.132 1201.86 234.132C1194.68 233.92 1187.87 233.814 1181.41 233.814C1175.67 233.814 1170.89 233.92 1167.07 234.132C1163 234.132 1159.06 234.344 1155.23 234.768L1157.03 228.409C1160.61 227.561 1164.32 226.077 1168.14 223.957C1171.73 221.837 1175.79 218.764 1180.34 214.736C1184.64 210.708 1189.3 205.409 1194.32 198.837L1347.47 8.05408C1349.14 8.05408 1350.69 8.05408 1352.13 8.05408C1353.8 8.05408 1355.47 8.05408 1357.15 8.05408L1371.49 208.059C1372.21 215.69 1374.36 220.99 1377.95 223.957C1381.78 226.713 1385.48 228.197 1389.07 228.409L1387.63 234.768C1382.37 234.344 1375.68 234.132 1367.55 234.132C1359.42 233.92 1351.65 233.814 1344.24 233.814C1334.91 233.814 1326.07 233.92 1317.7 234.132C1309.33 234.132 1302.63 234.344 1297.61 234.768L1299.05 228.409C1310.52 227.985 1318.65 226.183 1323.44 223.003C1328.22 219.612 1330.37 212.51 1329.89 201.699L1320.57 48.1186L1326.3 43.985L1213.33 185.165ZM1143.12 145.59L1348.54 143.192L1345.67 149.552L1136.67 151.949L1143.12 145.59Z" stroke-width="12.134" stroke-linejoin="round" stroke="currentColor"/></g>
+<g class="wm-l" data-cx="1449" data-cy="216"><use href="#stroke6_989_3397" fill="currentColor"/></g>
+</svg>
         </button>
     </header>
 
     <nav class="menu" id="menu" aria-label="Sections" inert>
         <ol class="menu-list" id="menuList"></ol>
         <p class="menu-note mono">
-            [ placeholder menu]
+            [ placeholder menu &mdash; the isometric version comes later ]
         </p>
     </nav>
 
     <!-- =====================================================
-         SITE: one 2D "world" that is moved step by step.
-         Panels stack vertically. The philosophy panel also
-         moves sideways inside itself (dual axis).
+         SITE: one 2D "world" moved along a path (see script.js).
          ===================================================== -->
     <main class="viewport" id="viewport">
         <div class="world" id="world">
 
-            <!-- 0. HERO (KOMASTA placeholder, becomes a video later) -->
-            <section class="panel panel--hero tone-light" data-scope data-label="komasta">
-                <h1 class="hero-title" data-reveal>KOMASTA</h1>
+            <!-- 0. HOME -->
+            <section class="panel panel--hero" data-scope data-label="home" data-header="cream">
+                <h1 class="sr-only">CETERA.</h1>
+
+                <!-- HERO VIDEO SLOT (blank for now). Drop the Komasta video in here, e.g.
+                     <video src="assets/hero.mp4" autoplay muted loop playsinline></video> -->
+                <div class="hero-media" aria-hidden="true"></div>
+
+                <p class="hero-cap" data-reveal style="--i: 2">This is what &ldquo;the rest&rdquo; looks like.</p>
+                <p class="hero-blurb" data-reveal style="--i: 3">
+                    We handle the rest. A Mumbai based design studio built to take your
+                    idea and see it all the way through.
+                </p>
             </section>
 
-            <!-- 1. WHO EVEN ARE WE: the interruption, what cetera means, then the team.
-                 The panel scrolls a little inside itself, then snaps on to the next one. -->
-            <section class="panel panel--who tone-mid" data-scope data-label="who are we">
-                <div class="scroller">
-                    <div class="who-screen">
-                        <canvas class="dot-grid" aria-hidden="true"></canvas>
+            <!-- 1. ABOUT: "we're the et before the cetera". Scrolls a little inside itself; the
+                 team strip at the end expands to fill the screen as you scroll (script.js sets --x). -->
+            <section class="panel panel--about" data-scope data-label="about" data-header="cream">
+                <div class="scroller" id="aboutScroller">
+                    <div class="about-1">
+                        <h2 class="about-head" data-reveal style="--i: 0">
+                            <span class="about-head__a">We&rsquo;re the &ldquo;ET&rdquo;</span>
+                            <span class="about-head__b">before the cetera.</span>
+                        </h2>
 
-                        <div class="who">
-                            <p class="mono" data-reveal style="--i: 0">[ interruption ]</p>
-                            <h2 class="shout" data-reveal style="--i: 1">
-                                BUT WAIT<span class="shout__dash">&mdash;</span><br />
-                                who even are we?
-                            </h2>
-                        </div>
+                        <!-- placeholders cut from the mockup: swap for the real eye cutouts -->
+                        <img class="eye eye--l" src="assets/placeholders/eye-left.png" alt="" data-reveal style="--i: 3" />
+                        <img class="eye eye--r" src="assets/placeholders/eye-right.png" alt="" data-reveal style="--i: 4" />
 
-                        <!-- Three dots with faces. Eyes follow the cursor. Click one to change its mood. -->
-                        <div class="faces" aria-hidden="true" data-reveal style="--i: 3">
-                            <div class="face face--a" data-mood="smug">
-                                <div class="eyes">
-                                    <span class="eye"><span class="pupil"></span></span>
-                                    <span class="eye"><span class="pupil"></span></span>
-                                </div>
-                            </div>
-                            <div class="face face--b" data-mood="sleepy">
-                                <div class="eyes">
-                                    <span class="eye"><span class="pupil"></span></span>
-                                    <span class="eye"><span class="pupil"></span></span>
-                                </div>
-                            </div>
-                            <div class="face face--c" data-mood="wide">
-                                <div class="eyes">
-                                    <span class="eye"><span class="pupil"></span></span>
-                                    <span class="eye"><span class="pupil"></span></span>
-                                </div>
-                            </div>
-                        </div>
-
+                        <p class="about-okay" data-reveal style="--i: 5">okay</p>
+                        <p class="about-us" data-reveal style="--i: 6">but like&hellip; us?</p>
                     </div>
 
-                    <div class="who-intro">
-                        <div class="intro">
-                            <!-- Dictionary-style entry. The pronunciation is DRAFT copy: confirm how CETERA is said. -->
-                            <article class="dict" data-sreveal style="--i: 0">
-                                <header class="dict__head">
-                                    <h3 class="dict__word">cetera</h3>
-                                    <span class="dict__pron">/&#712;s&#603;t.&#601;r.&#601;/</span>
-                                    <span class="dict__pos">noun</span>
-                                </header>
-
-                                <p class="dict__def">
-                                    the rest; all the remaining things.
-                                    <span class="dict__origin">[from the Latin <em>et c&#275;tera</em>, &ldquo;and the rest.&rdquo;]</span>
-                                </p>
-                            </article>
-                            <!-- GRAPHIC SLOT: drop an asset in here, e.g.
-                                 <img src="assets/intro-graphic.svg" alt="" />
-                                 (img / svg / video all fill the slot) -->
-                            <figure class="art" data-sreveal style="--i: 2" aria-hidden="true">
-                                <span class="art__placeholder mono">[ graphic goes here ]</span>
-                            </figure>
-
-                            <h2 class="shout shout--xl intro__head" data-sreveal style="--i: 3">
-                                There is<br />always more.
-                            </h2>
-
-                            <p class="body intro__body" data-sreveal style="--i: 4">
-                                A design studio that looks beyond the obvious, explores the
-                                unfinished, and finds possibilities in the unexpected. It does
-                                not assume that there is one right answer or a final destination.
-                            </p>
-                        </div>
+                    <div class="about-2">
+                        <p class="about-body" data-sreveal style="--i: 0">
+                            a design studio with your brief on our mind and an unhealthy obsession with
+                            getting it right. we take the idea living rent-free in your head and make it
+                            impossible to ignore in the real world.
+                        </p>
+                        <p class="about-rest" data-sreveal style="--i: 1">The rest? Already on us.</p>
                     </div>
 
-                    <div class="team">
-                        <header class="section-head">
-                            <h2 class="big" data-sreveal style="--i: 0">the team</h2>
-                            <p class="mono" data-sreveal style="--i: 1">[ five people, placeholders for now ]</p>
-                        </header>
+                    <div class="team-expand" id="teamExpand">
+                        <div class="team-stage">
+                            <h2 class="team-head">
+                                <span>Meet the</span>
+                                <span>team</span>
+                            </h2>
 
-                        <div class="members">
-                            <figure class="member" data-sreveal style="--i: 1">
-                                <div class="avatar"><span class="mono">photo</span></div>
-                                <figcaption><strong>Name Surname</strong><span class="mono">role</span></figcaption>
-                            </figure>
-                            <figure class="member" data-sreveal style="--i: 2">
-                                <div class="avatar"><span class="mono">photo</span></div>
-                                <figcaption><strong>Name Surname</strong><span class="mono">role</span></figcaption>
-                            </figure>
-                            <figure class="member" data-sreveal style="--i: 3">
-                                <div class="avatar"><span class="mono">photo</span></div>
-                                <figcaption><strong>Name Surname</strong><span class="mono">role</span></figcaption>
-                            </figure>
-                            <figure class="member" data-sreveal style="--i: 4">
-                                <div class="avatar"><span class="mono">photo</span></div>
-                                <figcaption><strong>Name Surname</strong><span class="mono">role</span></figcaption>
-                            </figure>
-                            <figure class="member" data-sreveal style="--i: 5">
-                                <div class="avatar"><span class="mono">photo</span></div>
-                                <figcaption><strong>Name Surname</strong><span class="mono">role</span></figcaption>
-                            </figure>
+                            <!-- placeholder photos + names from the mockup -->
+                            <ul class="team-strip">
+                            <li class="tm">
+                                <img src="assets/placeholders/team-1.jpg" alt="" />
+                                <p class="tm__cap"><span>Milo Voss</span><span>Brand Strategist</span></p>
+                            </li>
+                            <li class="tm">
+                                <img src="assets/placeholders/team-2.jpg" alt="" />
+                                <p class="tm__cap"><span>Milo Voss</span><span>Brand Strategist</span></p>
+                            </li>
+                            <li class="tm">
+                                <img src="assets/placeholders/team-3.jpg" alt="" />
+                                <p class="tm__cap"><span>Milo Voss</span><span>Brand Strategist</span></p>
+                            </li>
+                            <li class="tm">
+                                <img src="assets/placeholders/team-4.jpg" alt="" />
+                                <p class="tm__cap"><span>Milo Voss</span><span>Brand Strategist</span></p>
+                            </li>
+                            <li class="tm">
+                                <img src="assets/placeholders/team-5.jpg" alt="" />
+                                <p class="tm__cap"><span>Milo Voss</span><span>Brand Strategist</span></p>
+                            </li>
+                            <li class="tm">
+                                <img src="assets/placeholders/team-6.jpg" alt="" />
+                                <p class="tm__cap"><span>Milo Voss</span><span>Brand Strategist</span></p>
+                            </li>
+                            </ul>
                         </div>
                     </div>
                 </div>
             </section>
-
             <!-- 3. PHILOSOPHY: dual-axis. 01 -> (right) 02 -> (down) 03 -->
             <section class="panel panel--philosophy" data-label="philosophy">
                 <svg class="minimap" id="minimap" viewBox="0 0 64 64" aria-hidden="true">
@@ -316,7 +295,7 @@
             </section>
 
             <!-- 4. SERVICES -->
-            <section class="panel panel--services tone-mid" data-scope data-label="services">
+            <section class="panel panel--services tone-mid" data-scope data-label="services" data-header="ink">
                 <div class="services">
                     <header class="section-head">
                         <h2 class="big" data-reveal style="--i: 0">services</h2>
@@ -449,8 +428,17 @@
         <p class="footer-meta mono">there is always more &mdash; &copy; 2026 cetera</p>
     </div>
 
+    <!-- CURSOR: the dot follows the pointer exactly, the small dot trails it. Over anything
+         interactive the dot grows into a disc and the blend flips the colours underneath. -->
+    <div class="cursor cursor--dot" id="cursorDot" aria-hidden="true"><i></i></div>
+    <div class="cursor cursor--trail" id="cursorTrail" aria-hidden="true"><i></i></div>
+
     <script src="script.js"></script>
 </body>
 </html>
+
+
+
+
 
 
