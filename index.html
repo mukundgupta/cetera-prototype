@@ -107,8 +107,7 @@
                 </p>
             </section>
 
-            <!-- 1. ABOUT: "we're the et before the cetera". Scrolls a little inside itself; the
-                 team strip at the end expands to fill the screen as you scroll (script.js sets --x). -->
+            <!-- 1. ABOUT: "we're the et before the cetera". Scrolls a little inside itself, ending on the team. -->
             <section class="panel panel--about" data-scope data-label="about" data-header="cream">
                 <div class="scroller" id="aboutScroller">
                     <div class="about-1">
@@ -134,41 +133,67 @@
                         <p class="about-rest" data-sreveal style="--i: 1">The rest? Already on us.</p>
                     </div>
 
-                    <div class="team-expand" id="teamExpand">
-                        <div class="team-stage">
-                            <h2 class="team-head">
-                                <span>Meet the</span>
-                                <span>team</span>
-                            </h2>
+                    <!-- TEAM. Hover (or focus, or tap) a column and it grows, flexbox style, and shows its description.
+                         The strip itself never changes size. There are no photos yet: each column is a placeholder.
+                         When photos arrive, add <img src="..." alt="Name"> as the FIRST child of the <li>; it fills
+                         the column (object-fit: cover), so it needs to read at the narrow and the expanded width.
+                         Names, roles and descriptions are placeholders. -->
+                    <div class="team-block">
+                        <h2 class="team-head">
+                            <span>Meet the</span>
+                            <span>team</span>
+                        </h2>
 
-                            <!-- placeholder photos + names from the mockup -->
-                            <ul class="team-strip">
-                            <li class="tm">
-                                <img src="assets/placeholders/team-1.jpg" alt="" />
+                        <ul class="team-strip">
+                        <li class="tm" tabindex="0">
+                            <div class="tm__body">
+                                <div class="tm__more">
+                                    <p class="tm__desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.</p>
+                                </div>
                                 <p class="tm__cap"><span>Milo Voss</span><span>Brand Strategist</span></p>
-                            </li>
-                            <li class="tm">
-                                <img src="assets/placeholders/team-2.jpg" alt="" />
+                            </div>
+                        </li>
+                        <li class="tm" tabindex="0">
+                            <div class="tm__body">
+                                <div class="tm__more">
+                                    <p class="tm__desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.</p>
+                                </div>
                                 <p class="tm__cap"><span>Milo Voss</span><span>Brand Strategist</span></p>
-                            </li>
-                            <li class="tm">
-                                <img src="assets/placeholders/team-3.jpg" alt="" />
+                            </div>
+                        </li>
+                        <li class="tm" tabindex="0">
+                            <div class="tm__body">
+                                <div class="tm__more">
+                                    <p class="tm__desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.</p>
+                                </div>
                                 <p class="tm__cap"><span>Milo Voss</span><span>Brand Strategist</span></p>
-                            </li>
-                            <li class="tm">
-                                <img src="assets/placeholders/team-4.jpg" alt="" />
+                            </div>
+                        </li>
+                        <li class="tm" tabindex="0">
+                            <div class="tm__body">
+                                <div class="tm__more">
+                                    <p class="tm__desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.</p>
+                                </div>
                                 <p class="tm__cap"><span>Milo Voss</span><span>Brand Strategist</span></p>
-                            </li>
-                            <li class="tm">
-                                <img src="assets/placeholders/team-5.jpg" alt="" />
+                            </div>
+                        </li>
+                        <li class="tm" tabindex="0">
+                            <div class="tm__body">
+                                <div class="tm__more">
+                                    <p class="tm__desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.</p>
+                                </div>
                                 <p class="tm__cap"><span>Milo Voss</span><span>Brand Strategist</span></p>
-                            </li>
-                            <li class="tm">
-                                <img src="assets/placeholders/team-6.jpg" alt="" />
+                            </div>
+                        </li>
+                        <li class="tm" tabindex="0">
+                            <div class="tm__body">
+                                <div class="tm__more">
+                                    <p class="tm__desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.</p>
+                                </div>
                                 <p class="tm__cap"><span>Milo Voss</span><span>Brand Strategist</span></p>
-                            </li>
-                            </ul>
-                        </div>
+                            </div>
+                        </li>
+                        </ul>
                     </div>
                 </div>
             </section>
@@ -436,6 +461,7 @@
     <script src="script.js"></script>
 </body>
 </html>
+
 
 
 

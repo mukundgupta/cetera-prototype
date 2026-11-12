@@ -211,18 +211,7 @@
     const LETTER_LIFT = 9; // ...and lifted
     const LETTER_TILT = 4; // ...and tilted (degrees)
     const LETTER_SWELL = 0.045; // ...and swelled (0.045 = 4.5%)
-    const LETTER_HOP = 340; // how hard they hop one after another when the wordmark lands
     const LETTER_DAMP = 1.45;
-
-    function hopLetters() {
-        letters.forEach((L, i) => {
-            setTimeout(() => {
-                L.vy -= LETTER_HOP;
-                L.vr += (i % 2 ? 1 : -1) * LETTER_HOP * 0.18;
-                L.vs += LETTER_HOP / 120;
-            }, i * 55);
-        });
-    }
 
     // While the menu is open the wordmark shrinks to its header size (and grows back when it closes),
     // so the big wordmark is not sitting on top of the menu. Only matters on the home screen: anywhere
@@ -235,8 +224,10 @@
         placeHeader();
     }
 
+    let reactReady = 0; // 0 -> 1 over the first second after the loader: the hover reaction fades in
     function updateLetters(dt) {
-        const calm = 1 - 0.55 * hdrEff; // quieter once the wordmark has shrunk into the header
+        if (!locked) reactReady = Math.min(1, reactReady + dt / 1.0);
+        const calm = (1 - 0.55 * hdrEff) * smooth(reactReady); // quieter once the wordmark has shrunk into the header
         const live = pointer.x !== FAR && !reduceMotion && !locked;
         // the pointer in the wordmark own coordinates (the 1479 x 248 drawing)
         const px = (pointer.x - wmState.x) / (wmState.sx * wmState.u);
@@ -620,8 +611,6 @@
             introDone = true;
             placeHeader();
         });
-        // the letters hop one after another as it lands
-        setTimeout(hopLetters, reduceMotion ? 0 : 480);
 
         // once the wordmark is well on its way, the tiles lift off the hero
         await wait(TILES_AT);
@@ -733,18 +722,17 @@
         });
     });
 
-    // The team strip grows from its inset size to the full screen as you scroll through
-    // .team-expand (a tall block whose stage sticks to the screen). CSS reads --x (0 -> 1).
-    const aboutScroller = $("#aboutScroller");
-    const teamExpand = $("#teamExpand");
-    function updateTeam() {
-        if (!aboutScroller || !teamExpand) return;
-        const range = teamExpand.offsetHeight - aboutScroller.clientHeight;
-        const x = range > 0 ? clamp((aboutScroller.scrollTop - teamExpand.offsetTop) / range, 0, 1) : 0;
-        teamExpand.style.setProperty("--x", x.toFixed(4));
+    // Team: hover / keyboard focus is pure CSS. On touch screens (no hover) a tap opens a column instead.
+    const teamCols = $$(".tm");
+    if (window.matchMedia("(hover: none)").matches) {
+        teamCols.forEach((li) =>
+            li.addEventListener("click", () => {
+                const open = !li.classList.contains("is-open");
+                teamCols.forEach((o) => o.classList.remove("is-open"));
+                if (open) li.classList.add("is-open");
+            })
+        );
     }
-    if (aboutScroller) aboutScroller.addEventListener("scroll", updateTeam, { passive: true });
-    window.addEventListener("resize", updateTeam);
 
     // ------------------------------------------------------------------
     // Input: wheel / trackpad, touch, keys
@@ -1207,6 +1195,7 @@
         wordmark.disabled = false;
     });
 })();
+
 
 
 

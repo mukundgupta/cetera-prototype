@@ -588,22 +588,13 @@ a {
     text-transform: uppercase;
 }
 
-/* The team strip. .team-expand is tall; .team-stage sticks to the screen while you scroll through
-   it, and script.js sets --x (0 -> 1) on .team-expand: the strip grows from its inset size to
-   fill the whole screen. */
-.team-expand {
-    --x: 0;
+/* The team: a headline and a strip of six columns. Hover (or focus, or tap) a column and it grows,
+   flexbox style, and reveals its description. The strip itself never changes size. */
+.team-block {
     position: relative;
-    height: 175vh;
-    height: 175dvh;
-    margin-top: 7vw;
-}
-
-.team-stage {
-    position: sticky;
-    top: 0;
     height: 100vh;
     height: 100dvh;
+    margin-top: 7vw;
     overflow: hidden;
 }
 
@@ -619,51 +610,95 @@ a {
     font-size: clamp(3rem, 9.3vw, 10.5rem);
     line-height: 0.9;
     text-transform: uppercase;
-    opacity: calc(1 - var(--x) * 2.6);
-    transform: translate3d(0, calc(var(--x) * -5vw), 0);
 }
 
 .team-strip {
     position: absolute;
-    top: calc(25dvh - var(--x) * 25dvh);
-    bottom: calc(8dvh - var(--x) * 8dvh);
-    left: calc((1 - var(--x)) * var(--edge-x));
-    right: calc((1 - var(--x)) * var(--edge-x));
+    top: 25dvh;
+    bottom: 8dvh;
+    left: var(--edge-x);
+    right: var(--edge-x);
     display: flex;
     list-style: none;
-    border: 1px solid rgb(253 250 195 / calc(1 - var(--x)));
-    background: var(--black);
+    border: 1px solid var(--cream);
 }
 
 .tm {
     position: relative;
-    flex: 1;
+    flex: 1 1 0;
     min-width: 0;
     overflow: hidden;
+    background: rgb(0 0 0 / 0.2); /* placeholder until the photos arrive */
+    transition: flex-grow 0.65s var(--ease-out), background-color 0.4s ease;
+    outline-offset: -4px;
 }
 
 .tm + .tm {
-    border-left: 1px solid rgb(253 250 195 / calc(1 - var(--x)));
+    border-left: 1px solid var(--cream);
 }
 
-.tm img {
+.tm:hover,
+.tm:focus-visible,
+.tm.is-open {
+    flex-grow: 3.4;
+    background: rgb(0 0 0 / 0.32);
+}
+
+/* the photo, once there is one: it fills the column at any width */
+.tm > img {
+    position: absolute;
+    inset: 0;
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.tm__cap {
+.tm__body {
     position: absolute;
     left: 1.3vw;
+    right: 0.5vw;
     bottom: 1.3vw;
     display: flex;
     flex-direction: column;
+    gap: 0.9vw;
+    color: var(--cream);
+}
+
+.tm__cap {
+    display: flex;
+    flex-direction: column;
+    white-space: nowrap; /* never wraps while the columns resize */
     font-family: var(--font-head);
     font-size: clamp(0.8rem, 1.35vw, 1.5rem);
     line-height: 1.02;
     text-transform: uppercase;
-    color: var(--cream);
+}
+
+/* the description opens above the name once the column is wide enough */
+.tm__more {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition: grid-template-rows 0.55s var(--ease-out), opacity 0.3s ease;
+}
+
+.tm__desc {
+    overflow: hidden;
+    min-height: 0;
+    max-width: 24ch;
+    font-family: var(--font-body);
+    font-size: clamp(0.8rem, 1vw, 1.05rem);
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+}
+
+.tm:hover .tm__more,
+.tm:focus-visible .tm__more,
+.tm.is-open .tm__more {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    transition-delay: 0.12s;
 }
 /* =========================================================
    3. PHILOSOPHY (dual axis)
@@ -1273,6 +1308,26 @@ a {
         flex: 0 0 33.333%;
         height: 50%;
     }
+
+    .tm:hover,
+    .tm:focus-visible,
+    .tm.is-open {
+        flex-grow: 0;
+    }
+
+    .tm__more {
+        display: none;
+    }
+
+    .tm:hover,
+    .tm:focus-visible,
+    .tm.is-open {
+        flex-grow: 0;
+    }
+
+    .tm__more {
+        display: none;
+    }
 }
 
 @media (max-width: 560px) {
@@ -1318,5 +1373,8 @@ a {
         opacity: 1;
     }
 }
+
+
+
 
 
